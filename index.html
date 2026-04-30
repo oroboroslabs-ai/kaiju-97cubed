@@ -3,1003 +3,984 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KAIJU-97³ — Oroboros Labs Benchmark Report</title>
+<title>KAIJU 97³ Access — Gadora Interface 2.0</title>
 <style>
 :root {
-  --cyan: #00f0ff;
-  --purple: #8b5cf6;
-  --dark: #070711;
-  --dark2: #0a0a14;
-  --dark3: #0f1020;
-  --text: #e2e8f0;
-  --bc: rgba(0,240,255,0.13);
-  --bp: rgba(139,92,246,0.18);
+  --bg:#000; --bg2:#0a0a0a; --bg3:#111; --surface:#161616;
+  --border:#222; --border2:#333;
+  --text:#fff; --text2:#aaa; --text3:#666; --accent:#fff;
+  --user-bubble:#fff; --user-text:#000;
+  --bot-bubble:#111;
+  --err:#ff4444; --green:#34d399;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --mono:'SF Mono','Cascadia Code','Consolas','Courier New',monospace;
 }
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
-body {
-  background: var(--dark);
-  color: var(--text);
-  font-family: 'Courier New', 'Consolas', monospace;
-  overflow-x: hidden;
-}
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(0,240,255,0.028) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,240,255,0.028) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
-  z-index: 0;
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--font);display:flex;height:100vh;
+  -webkit-font-smoothing:antialiased;
 }
 
-/* ── NAV ── */
-nav {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(7,7,17,0.94);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--bc);
-  padding: 0 40px;
-  display: flex;
-  align-items: center;
-  height: 54px;
-  gap: 0;
+/* ── SIDEBAR ── */
+.sidebar{
+  width:300px;min-width:300px;background:var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;height:100vh;
+  transition:transform .25s ease;z-index:20;
 }
-.nav-brand {
-  font-size: 15px; font-weight: 900;
-  letter-spacing: 3px;
-  background: linear-gradient(90deg, var(--cyan), var(--purple));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-right: auto; white-space: nowrap;
-  font-family: 'Arial Black', sans-serif;
+.sidebar.hidden{transform:translateX(-100%);min-width:0;width:0;overflow:hidden;border:none}
+.sidebar-header{position:relative;padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-brand{font-size:18px;font-weight:800;letter-spacing:-0.3px;margin-bottom:2px}
+.sidebar-brand sup{font-size:.55em;font-weight:700}
+.sidebar-tier{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--text3);margin-top:4px} .sidebar-toggle{position:fixed;top:58px;left:302px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);color:rgba(255,255,255,.1);cursor:pointer;border-radius:4px;transition:all .2s;z-index:99} .sidebar-toggle:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.3)}
+.sidebar-model{margin:16px 20px}
+.sidebar-model select{
+  width:100%;padding:10px 12px;background:var(--bg3);
+  border:1px solid var(--border);color:var(--text);
+  font-size:13px;font-family:var(--font);border-radius:8px;cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
 }
-.nav-brand sup { font-size: 0.55em; vertical-align: super; -webkit-text-fill-color: var(--purple); }
-nav ul { display: flex; list-style: none; gap: 0; }
-nav a {
-  display: block;
-  padding: 0 16px; height: 54px; line-height: 54px;
-  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-  color: rgba(0,240,255,0.35); text-decoration: none;
-  border-bottom: 2px solid transparent;
-  transition: color .2s, border-color .2s;
+.sidebar-model select:focus{outline:none;border-color:var(--border2)}
+.sidebar-history{flex:1;overflow-y:auto;padding:8px 12px}
+.sidebar-history::-webkit-scrollbar{width:3px}
+.sidebar-history::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.history-item{
+  padding:10px 14px;border-radius:8px;cursor:pointer;
+  font-size:13px;color:var(--text2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:2px;transition:background .12s;
 }
-nav a:hover { color: var(--cyan); border-bottom-color: var(--cyan); }
-
-/* ── HERO ── */
-.hero {
-  position: relative; z-index: 1;
-  display: grid;
-  grid-template-columns: 1fr 460px;
-  min-height: calc(100vh - 54px);
-  max-width: 1380px;
-  margin: 0 auto;
-  padding: 56px 40px 40px;
-  gap: 48px;
-  align-items: center;
-}
-.hero-left { display: flex; flex-direction: column; gap: 22px; }
-.hero-badge {
-  display: flex; align-items: center; gap: 20px;
-}
-.badge-line { display: flex; flex-direction: column; gap: 5px; }
-.badge-org {
-  font-size: 11px; letter-spacing: 4px;
-  color: rgba(0,240,255,0.5); text-transform: uppercase;
-}
-.badge-doc {
-  font-size: 10px; letter-spacing: 2px;
-  color: rgba(139,92,246,0.4);
-}
-.hero-title {
-  font-size: clamp(50px, 6.5vw, 84px);
-  font-weight: 900;
-  font-family: 'Arial Black', 'Helvetica Neue', sans-serif;
-  background: linear-gradient(90deg, var(--cyan) 0%, var(--purple) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 4px; line-height: 1;
-  display: flex; align-items: flex-start;
-}
-.hero-sup {
-  font-size: 0.36em; line-height: 1;
-  margin-top: 0.06em;
-  -webkit-text-fill-color: var(--purple);
-  font-weight: 900; letter-spacing: 0;
-}
-.hero-desc {
-  font-size: 15px; line-height: 1.75;
-  color: rgba(255,255,255,0.52);
-  max-width: 560px; letter-spacing: 0.3px;
-}
-.hero-meta {
-  font-size: 11px;
-  color: rgba(0,240,255,0.32);
-  letter-spacing: 1.5px;
-  border-left: 2px solid rgba(0,240,255,0.18);
-  padding-left: 14px;
-  line-height: 2.1;
-}
-.hero-links {
-  display: flex; flex-wrap: wrap; gap: 9px;
-  margin-top: 4px;
-}
-.hero-links a {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 9px 18px;
-  border: 1px solid rgba(0,240,255,0.12);
-  border-radius: 5px;
-  font-size: 10px; letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(0,240,255,0.55);
-  text-decoration: none;
-  background: rgba(0,240,255,0.02);
-  transition: all .2s;
-  white-space: nowrap;
-}
-.hero-links a:hover {
-  background: rgba(0,240,255,0.06);
-  border-color: rgba(0,240,255,0.35);
-  color: var(--cyan);
-  box-shadow: 0 0 18px rgba(0,240,255,0.08);
-}
-.hero-links .n { font-size: 9px; color: rgba(0,240,255,0.28); }
-.hero-right {
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-}
-.hero-right::before {
-  content: '';
-  position: absolute; inset: -30px;
-  background: radial-gradient(ellipse at 50% 45%, rgba(139,92,246,0.14) 0%, transparent 68%);
-  pointer-events: none;
-}
-.kaiju-figure {
-  width: 100%; max-width: 440px;
-  filter: drop-shadow(0 0 48px rgba(139,92,246,0.28)) drop-shadow(0 0 20px rgba(0,240,255,0.1));
-  animation: float 7s ease-in-out infinite;
-}
-@keyframes float {
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(-14px); }
+.history-item:hover{background:var(--bg3)}
+.history-item.active{background:var(--bg3);color:var(--text)}
+.history-item .time{font-size:10px;color:var(--text3);display:block;margin-top:2px}
+.sidebar-footer{
+  padding:14px 20px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;
 }
 
-/* ── SECTIONS ── */
-.divider {
-  width: 100%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0,240,255,0.12), transparent);
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;height:100vh;min-width:0}
+.chat-header{
+  padding:16px 28px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;background:var(--bg);z-index:10;
 }
-.section {
-  position: relative; z-index: 1;
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 68px 40px;
+.chat-header-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.chat-header-title{font-size:13px;font-weight:600}
+.chat-header-sub{font-size:11px;color:var(--text3);margin-left:auto}
+.chat-log{
+  flex:1;overflow-y:auto;padding:24px 28px;
+  display:flex;flex-direction:column;gap:20px;
 }
-.section-header {
-  display: flex; align-items: baseline; gap: 14px;
-  margin-bottom: 30px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid rgba(0,240,255,0.08);
+.chat-log::-webkit-scrollbar{width:4px}
+.chat-log::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.empty-state{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;color:var(--text3);
 }
-.s-num {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px;
-  border: 1px solid rgba(0,240,255,0.18);
-  border-radius: 4px;
-  font-size: 10px;
-  color: rgba(0,240,255,0.4);
-  flex-shrink: 0;
-}
-.s-title {
-  font-size: 18px; font-weight: 700;
-  letter-spacing: 5px; text-transform: uppercase;
-  background: linear-gradient(90deg, var(--cyan), var(--purple));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+.empty-state .icon{font-size:48px;margin-bottom:8px;color:var(--text3);animation:oroboros-spin 60s linear infinite}
+.empty-state .title{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-0.3px}
+.empty-state .sub{font-size:14px;color:var(--text3);max-width:420px;text-align:center;line-height:1.6}
 
-/* summary text */
-.summary-p {
-  font-size: 15px; line-height: 1.85;
-  color: rgba(255,255,255,0.55);
-  max-width: 880px;
+/* ── MESSAGE BUBBLES ── */
+.msg{display:flex;gap:14px;max-width:820px;width:100%}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg.assistant{align-self:flex-start}
+.msg-avatar{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;
 }
+.msg.user .msg-avatar{background:var(--user-bubble);color:var(--user-text)}
+.msg.assistant .msg-avatar{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+.msg-body{display:flex;flex-direction:column;gap:4px}
+.msg.user .msg-body{align-items:flex-end}
+.msg-content{
+  padding:14px 18px;border-radius:14px;font-size:14px;line-height:1.65;
+  white-space:pre-wrap;word-break:break-word;position:relative;
+}
+.msg.user .msg-content{background:var(--user-bubble);color:var(--user-text);border-bottom-right-radius:4px;max-width:560px}
+.msg.assistant .msg-content{background:var(--bot-bubble);color:var(--text);border-bottom-left-radius:4px;border:1px solid var(--border);max-width:720px}
+.msg-content code{
+  font-family:var(--mono);font-size:12px;
+  background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;border:1px solid var(--border);
+}
+.msg-content pre{
+  margin:10px 0;padding:16px;background:var(--bg);
+  border:1px solid var(--border);border-radius:10px;overflow-x:auto;
+  font-family:var(--mono);font-size:12px;line-height:1.5;
+}
+.msg.user .msg-content pre{background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.15)}
+.msg-actions{display:flex;gap:6px;margin-top:4px;opacity:0;transition:opacity .15s}
+.msg:hover .msg-actions{opacity:1}
+.msg-action{
+  width:30px;height:30px;border-radius:50%;border:1px solid var(--border);
+  background:var(--bg);color:var(--text2);cursor:pointer;font-size:13px;
+  display:flex;align-items:center;justify-content:center;transition:all .12s;
+}
+.msg-action:hover{border-color:var(--border2);color:var(--text);background:var(--bg3)}
+.msg-action.speaking{background:var(--green);color:#000;border-color:var(--green)}
+.msg-timestamp{font-size:10px;color:var(--text3);margin-top:2px}
 
-/* data table */
-.dtable { width: 100%; border-collapse: collapse; font-size: 14px; }
-.dtable thead tr {
-  background: rgba(0,240,255,0.055);
-  border: 1px solid rgba(0,240,255,0.1);
+/* ── THINKING ── */
+.thinking{display:flex;gap:14px;max-width:820px;width:100%;align-self:flex-start}
+.thinking .msg-content{
+  background:var(--bot-bubble);border:1px solid var(--border);
+  border-radius:14px;border-bottom-left-radius:4px;
+  padding:14px 18px;font-size:13px;color:var(--text3);
+  display:flex;align-items:center;gap:8px;
 }
-.dtable thead th {
-  padding: 13px 20px; text-align: left;
-  font-size: 10px; letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(0,240,255,0.55); font-weight: 700;
-}
-.dtable tbody tr {
-  border-bottom: 1px solid rgba(0,240,255,0.035);
-  transition: background .15s;
-}
-.dtable tbody tr:hover { background: rgba(0,240,255,0.018); }
-.dtable td { padding: 13px 20px; color: rgba(255,255,255,0.5); vertical-align: middle; }
-.dtable .val { color: var(--cyan); font-weight: 700; font-size: 16px; }
-.dtable .valp { color: #c5a3ff; font-weight: 700; font-size: 16px; }
-.dtable .pass { color: #34d399; font-size: 13px; }
-.dtable .high { background: rgba(0,240,255,0.04); border-top: 1px solid rgba(0,240,255,0.18) !important; border-bottom: 1px solid rgba(0,240,255,0.18) !important; }
-.dtable .high td:first-child { color: var(--cyan); font-weight: 700; font-size: 16px; }
-.dtable .high .val { font-size: 20px; }
+.thinking-dots{display:flex;gap:4px}
+.thinking-dots span{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:think 1.4s infinite}
+.thinking-dots span:nth-child(2){animation-delay:.2s}
+.thinking-dots span:nth-child(3){animation-delay:.4s}
+@keyframes think{0%,60%,100%{opacity:.2;transform:scale(.8)}30%{opacity:1;transform:scale(1.2)}}@keyframes oroboros-spin{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
 
-/* bar */
-.bar-w { width: 160px; height: 7px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; }
-.bar-f { height: 100%; border-radius: 4px; background: linear-gradient(90deg,var(--cyan),var(--purple)); box-shadow: 0 0 8px rgba(0,240,255,0.4); }
+/* ── INPUT ── */
+.input-area{padding:16px 28px 24px}
+.input-row{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:16px;padding:8px 16px;transition:border-color .25s;
+}
+.input-row:focus-within{border-color:var(--border2)}
+.input-row textarea{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--text);font-family:var(--font);font-size:14px;line-height:1.5;
+  resize:none;max-height:160px;padding:10px 0;
+}
+.input-row textarea::placeholder{color:var(--text3)}
 
-/* stat bar */
-.stat-bar {
-  background: rgba(0,240,255,0.035);
-  border: 1px solid rgba(0,240,255,0.08);
-  border-radius: 5px;
-  padding: 14px 24px;
-  text-align: center;
-  font-size: 13px; letter-spacing: 2px;
-  color: rgba(0,240,255,0.55);
-  margin-top: 18px; font-weight: 700;
+.input-label{
+  font-size:11px;color:var(--text3);letter-spacing:1px;
+  white-space:nowrap;user-select:none;margin-right:6px;
 }
+.input-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.input-btn{
+  display:flex;align-items:center;justify-content:center;
+  background:transparent;border:none;padding:5px;cursor:pointer;
+  color:rgba(255,255,255,.35);transition:all .2s;
+  border-radius:6px;
+}
+.input-btn svg{display:block;transition:filter .2s}
+.input-btn:hover{color:#fff;filter:drop-shadow(0 0 8px rgba(255,255,255,.35))}
+.input-btn.send{color:rgba(255,255,255,.4);padding:5px}
+.input-btn.send:hover{color:#fff;filter:drop-shadow(0 0 12px rgba(255,255,255,.5))}
+.input-btn.mic.recording{
+  color:var(--err);
+  filter:drop-shadow(0 0 14px rgba(255,68,68,.7));
+  animation:mic-pulse 1.5s infinite;
+}
+.input-btn.call{color:#555}.input-btn.call:hover{color:#f44;filter:drop-shadow(0 0 10px rgba(255,68,68,.45))}.input-btn.call-active,.input-btn.call-active:hover{color:var(--green);filter:drop-shadow(0 0 10px rgba(52,211,153,.5))}
+@keyframes mic-pulse{0%,100%{filter:drop-shadow(0 0 10px rgba(255,68,68,.5))}50%{filter:drop-shadow(0 0 22px rgba(255,68,68,.9))}}
+.input-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:10px;transition:color .3s}
+.input-hint.recording{color:var(--err)}
 
-/* two panel */
-.two-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-.panel {
-  padding: 26px 28px;
-  background: rgba(0,0,0,0.18);
-  border: 1px solid var(--bc);
+/* ── VOICE OVERLAY ── */
+.voice-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.92);
+  z-index:200;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:24px;
+  opacity:0;pointer-events:none;transition:opacity .35s;
 }
-.panel.p { border-color: var(--bp); }
-.panel-head {
-  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-  margin-bottom: 18px; padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+.voice-overlay.active{opacity:1;pointer-events:auto}
+.voice-ring{
+  width:180px;height:180px;border-radius:50%;
+  border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
 }
-.panel-head.c { color: rgba(0,240,255,0.45); }
-.panel-head.pu { color: rgba(139,92,246,0.45); }
-.panel-row {
-  display: flex; justify-content: space-between;
-  align-items: baseline; padding: 9px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.025);
-  gap: 10px;
+.voice-ring.active{border-color:var(--green);animation:vr-pulse 2s infinite}
+.voice-ring.listening{border-color:var(--err);animation:vr-pulse .8s infinite}
+@keyframes vr-pulse{0%,100%{box-shadow:0 0 0 0 currentColor;opacity:1}50%{box-shadow:0 0 40px 10px transparent;opacity:.8}}
+.voice-ring-inner{
+  width:80px;height:80px;border-radius:50%;
+  background:var(--bg3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:32px;
 }
-.panel-row:last-child { border: none; }
-.pl { color: rgba(255,255,255,0.42); font-size: 13px; }
-.pv { color: var(--cyan); font-weight: 700; font-size: 14px; text-align: right; }
-.pv.pu { color: #c5a3ff; }
+.voice-waveform{
+  display:flex;gap:3px;align-items:flex-end;height:40px;
+}
+.voice-waveform .bar{
+  width:4px;background:var(--text3);border-radius:2px;
+  transition:height .08s ease;
+}
+.voice-waveform .bar.active{background:var(--green)}
+.voice-waveform .bar.speaking{background:var(--text)}
+.voice-status{font-size:18px;font-weight:600;letter-spacing:-0.3px}
+.voice-sub{font-size:13px;color:var(--text3)}
+.voice-close{
+  position:absolute;top:24px;right:24px;
+  width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--border);background:var(--bg);
+  color:var(--text);cursor:pointer;font-size:18px;
+  display:flex;align-items:center;justify-content:center;
+}
+.voice-close:hover{border-color:var(--border2);background:var(--bg3)}
 
-/* subsec label */
-.sublabel {
-  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-  color: rgba(139,92,246,0.45);
-  margin: 26px 0 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(139,92,246,0.07);
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+  background:var(--bg3);border:1px solid var(--border2);
+  padding:12px 24px;border-radius:30px;font-size:13px;color:var(--text);
+  z-index:999;opacity:0;pointer-events:none;transition:opacity .25s;
 }
+.toast.show{opacity:1}
 
-/* arch */
-.arch-row { display: flex; align-items: stretch; gap: 14px; margin-top: 22px; }
-.arch-box {
-  flex: 1; padding: 22px 20px; border-radius: 7px; text-align: center;
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  z-index:100;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s;
 }
-.arch-box.core { background: rgba(0,240,255,0.07); border: 1px solid rgba(0,240,255,0.28); }
-.arch-box.bridge { background: rgba(139,92,246,0.07); border: 1px solid rgba(139,92,246,0.28); flex: 2; }
-.arch-box.surf { background: rgba(0,240,255,0.035); border: 1px solid rgba(0,240,255,0.18); flex: 3; }
-.arch-box-t { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
-.arch-box.core .arch-box-t { color: var(--cyan); }
-.arch-box.bridge .arch-box-t { color: #c5a3ff; }
-.arch-box.surf .arch-box-t { color: rgba(0,240,255,0.7); }
-.arch-box-s { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.25); }
-.arch-arr { font-size: 20px; color: rgba(255,255,255,0.12); display: flex; align-items: center; flex-shrink: 0; }
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal{
+  background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+  padding:28px;max-width:500px;width:90vw;
+}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.modal-text{
+  background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:14px;font-size:14px;color:var(--text2);line-height:1.6;
+  max-height:200px;overflow-y:auto;margin-bottom:16px;
+}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.modal-btn{
+  padding:10px 24px;border-radius:20px;font-size:13px;font-weight:600;
+  cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text);
+  transition:all .12s;
+}
+.modal-btn:hover{border-color:var(--border2)}
+.modal-btn.primary{background:var(--text);color:var(--bg);border:none}
+.modal-btn.primary:hover{opacity:.85}
 
-/* ratio */
-.ratio-pull {
-  margin-top: 26px; padding: 14px 22px;
-  border-left: 3px solid rgba(0,240,255,0.25);
-  font-size: 13px; color: rgba(255,255,255,0.38);
-  letter-spacing: 1px; line-height: 1.7;
-}
-.ratio-pull strong {
-  background: linear-gradient(90deg, var(--cyan), var(--purple));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text; font-weight: 900;
-}
-
-/* ── SCALE VISUALIZATION ── */
-.scale-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin-top: 12px;
-}
-.scale-bar {
-  display: flex;
-  align-items: center;
-  height: 48px;
-  padding: 0 20px;
-  position: relative;
-  background: rgba(0,0,0,0.3);
-  border-left: 3px solid transparent;
-  margin-bottom: 0;
-  overflow: visible;
-}
-.scale-fill {
-  position: absolute;
-  left: 0; top: 0; height: 100%;
-  border-radius: 0 4px 4px 0;
-  transition: width 0.8s ease;
-  min-width: 2px;
-}
-.scale-industry { border-left-color: rgba(255,60,60,0.5); }
-.scale-industry .scale-fill { background: rgba(255,40,40,0.18); }
-.scale-nyros { border-left-color: rgba(0,240,255,0.5); }
-.scale-nyros .scale-fill { background: rgba(0,240,255,0.18); }
-.scale-kaiju { border-left-color: rgba(139,92,246,0.6); }
-.scale-kaiju .scale-fill { background: linear-gradient(90deg, rgba(0,240,255,0.22), rgba(139,92,246,0.22)); }
-.scale-leviathan { border-left-color: rgba(0,240,255,0.35); }
-.scale-leviathan .scale-fill { background: rgba(0,240,255,0.08); }
-.scale-beyond { border-left-color: rgba(255,255,255,0.08); }
-.scale-beyond .scale-fill.classified {
-  background: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 8px, transparent 8px, transparent 16px);
-  width: 100% !important;
-}
-
-.scale-label {
-  flex: 0 0 180px;
-  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-  color: rgba(255,255,255,0.5); font-weight: 700;
-  position: relative; z-index: 2;
-}
-.scale-value {
-  flex: 0 0 160px;
-  text-align: right;
-  font-size: 14px; font-weight: 900;
-  color: var(--cyan); letter-spacing: 1px;
-  position: relative; z-index: 2;
-  padding-right: 20px;
-}
-.scale-beyond .scale-value { color: rgba(255,255,255,0.3); letter-spacing: 3px; font-size: 11px; }
-
-.scale-divider {
-  height: 28px;
-  display: flex;
-  align-items: center;
-  padding-left: 200px;
-  position: relative;
-}
-.scale-divider::before {
-  content: '';
-  position: absolute;
-  left: 200px;
-  right: 0;
-  height: 1px;
-  background: rgba(255,255,255,0.05);
-}
-.scale-mult {
-  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-  color: rgba(139,92,246,0.5); font-weight: 700;
-  background: var(--dark2);
-  padding: 2px 10px;
-  position: relative; z-index: 2;
-}
-
-.scale-annotation {
-  margin-top: 20px;
-  font-size: 11px; color: rgba(255,255,255,0.3);
-  letter-spacing: 1px; line-height: 1.8;
-  padding: 14px 20px;
-  border-left: 2px solid rgba(139,92,246,0.2);
-}
-.scale-annotation strong {
-  color: var(--cyan); font-weight: 700;
-}
-
-/* footer */
-footer {
-  position: relative; z-index: 1;
-  border-top: 1px solid rgba(0,240,255,0.07);
-  padding: 40px 40px 48px;
-  text-align: center;
-}
-.foot-line { font-size: 11px; color: rgba(0,240,255,0.35); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; font-weight: 700; }
-.foot-sub { font-size: 11px; color: rgba(255,255,255,0.16); letter-spacing: 1px; max-width: 860px; margin: 0 auto; line-height: 1.9; }
-.foot-tag { font-size: 10px; color: rgba(255,255,255,0.1); margin-top: 8px; font-style: italic; }
-
-@media (max-width: 960px) {
-  .hero { grid-template-columns: 1fr; }
-  .hero-right { display: none; }
-  .two-panel { grid-template-columns: 1fr; }
-  .arch-row { flex-direction: column; }
-  .arch-arr { transform: rotate(90deg); justify-content: center; }
-  nav ul { display: none; }
-  nav { padding: 0 20px; }
-  .section { padding: 48px 20px; }
-  .hero { padding: 40px 20px 32px; }
-}
-
-@media (max-width: 768px) {
-  .scale-label { flex: 0 0 120px; font-size: 9px; }
-  .scale-value { flex: 0 0 100px; font-size: 11px; padding-right: 10px; }
-  .scale-divider { padding-left: 120px; }
-  .scale-divider::before { left: 120px; }
+/* ── MOBILE ── */
+.menu-btn{display:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;font-size:16px;align-items:center;justify-content:center}
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;transform:translateX(-100%)}
+  .sidebar:not(.hidden){transform:translateX(0)}
+  .menu-btn{display:flex}
+  .chat-header{padding:12px 16px}
+  .chat-log{padding:16px}
+  .input-area{padding:10px 12px 16px}
+  .msg-content{font-size:13px}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════ NAV -->
-<nav>
-  <div class="nav-brand">KAIJU-97<sup>3</sup></div>
-  <ul>
-    <li><a href="#summary">Summary</a></li>
-    <li><a href="#init">Init</a></li>
-    <li><a href="#inference">Inference</a></li>
-    <li><a href="#memory">Memory</a></li>
-    <li><a href="#compression">Compression</a></li>
-    <li><a href="#comparison">Comparison</a></li>
-    <li><a href="#architecture">Architecture</a></li>
-    <li><a href="#scale">Scale</a></li>
-  </ul>
-</nav>
+<!-- ════════════════ ICON SPRITE ════════════════ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <defs>
+    <!-- Send arrow (from Oroboros Copilot) -->
+    <symbol id="ic-send" viewBox="0 0 16 16">
+      <path d="M.199 1.86a.75.75 0 0 1 .948-.279l13.5 6.75a.75.75 0 0 1 0 1.338l-13.5 6.75a.75.75 0 0 1-1.073-.864L2.46 8.001.074 2.724A.75.75 0 0 1 .199 1.86zm2.302 1.2L4.2 7.251h5.05a.75.75 0 0 1 0 1.498H4.2L2.501 12.94 13.036 8 2.501 3.06z" fill="currentColor"/>
+    </symbol>
+    <!-- Speaker with sound waves (megaphone/blowhorn) -->
+    <symbol id="ic-speaker-wave" viewBox="0 0 24 24">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M15 9.5a5 5 0 010 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M18 7a8 8 0 010 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M21 4.5a12 12 0 010 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <!-- Microphone -->
+    <symbol id="ic-mic" viewBox="0 0 24 24">
+      <rect x="9" y="1" width="6" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M5 10a7 7 0 0014 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <line x1="12" y1="17" x2="12" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <line x1="8" y1="22" x2="16" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <!-- Phone -->
+    <!-- Round solid dot (call button) -->
+    <symbol id="ic-dot" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="ic-phone" viewBox="0 0 24 24">
+      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <!-- Copy -->
+    <symbol id="ic-copy" viewBox="0 0 24 24">
+      <rect x="8" y="8" width="13" height="13" rx="2" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M16 8V5a2 2 0 00-2-2H5a2 2 0 00-2 2v9a2 2 0 002 2h3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <!-- Speaker -->
+    <symbol id="ic-speaker" viewBox="0 0 24 24">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M15.54 8.46a5 5 0 010 7.07" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <path d="M19.07 4.93a10 10 0 010 14.14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <!-- X logo -->
+    <symbol id="ic-x" viewBox="0 0 24 24">
+      <line x1="4" y1="4" x2="20" y2="20" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <line x1="20" y1="4" x2="4" y2="20" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <!-- Menu -->
+    <symbol id="ic-menu" viewBox="0 0 24 24">
+      <line x1="4" y1="6" x2="20" y2="6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <line x1="4" y1="12" x2="20" y2="12" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <line x1="4" y1="18" x2="20" y2="18" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <!-- User -->
+    <symbol id="ic-user" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <path d="M4 21a8 8 0 0116 0" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <!-- Oroboros Logo -->
+    <symbol id="ic-oroboros" viewBox="0 0 736 736">
+      <path fill="currentColor" d="M261.4 638.7C197.3 612.2 149.5 568.1 116.9 507.4C100.8 477.4 91 445.2 86.5 411.3C80.9 368 84.9 325.5 99 284.3C124.5 209.8 172.8 154.9 243.1 119.3C248.3 116.7 253.6 114.4 258.9 112C260.3 111.3 261.7 110.8 262.4 109.3C264.9 103.9 269.8 101.1 274.8 98.9C293.8 90.7 313.5 84.6 333.5 79.5C343.2 77 353.1 78.4 362.6 81.1C386.1 87.8 410.1 92.5 433.9 97.7C478.2 107.4 517.6 127.4 552.2 156.7C601.5 198.4 634.1 250.8 647.2 314.1C666.1 405.1 645.8 487.2 586.5 558.7C548.3 604.9 499.2 635.5 441 650.6C380.1 666.4 320.3 662 261.4 638.7M523.7 558.8C528.4 557.3 532.9 555.2 538 554.5C549.6 553 561.3 551.2 572.9 548.8C586.8 545.8 594.6 533.1 592.2 519.1C590.3 507.9 588.6 496.8 586.9 485.6C585.4 475.8 588.4 466.8 592.5 457.6C595.6 453.7 598.3 449.5 602.3 446.4C611.1 439.8 619.8 433.1 628.5 426.4C643.1 415.3 644.7 400.9 632.9 386.8C626.7 379.6 620.9 372.1 614.7 365C601.5 349.7 599.5 333.2 608.2 315C612.8 305.4 616.8 295.5 620.7 285.6C623.9 277.5 623.4 269.7 616.8 262.4C614.4 258.2 610.2 256.3 606 254.7C594.8 250.5 583.4 246.9 572.4 242.3C558.2 236.3 549.1 225.8 546.7 210.4C544.7 197.5 543.7 184.6 541.8 171.8C540.3 161.4 531.7 153.3 521.8 152.4C512.3 151.5 503.2 154.8 494 156.3C500.9 155.8 507.7 154.6 514.6 153.7C528.3 151.8 539.2 159.8 541 173.3C542.4 183.3 543.4 193.4 544.3 203.5C545.8 220 552.6 233.4 567.5 241.3C575.1 245.3 583.6 247.5 591.7 250.7C600.4 254.2 610 255.9 617.2 263.7C622.5 272.5 622 281.2 617.6 290.3C613 299.9 608.7 309.7 604.9 319.6C599 335.3 601.2 350.1 611.6 363.4C618.4 372.2 625.6 380.7 632.8 389.2C642.7 400.9 641.4 414.7 629.3 424.2C620.4 431.1 611.3 437.9 602.4 444.9C598 448.4 593.8 452.3 591.5 458.5C586.6 467.1 584.3 476.2 585.9 486.2C587.6 497.6 589.5 509.1 591.1 520.6C593 534.4 584.4 546 570.6 548.2C559.6 550 548.6 551.5 537.6 553.3C532.4 554.2 527.2 555.3 522.3 559.2C514.5 562.9 509.1 569.1 504.8 576.5C509.6 569.3 516.4 564.2 523.7 558.8M502.6 563.1C514.4 554.3 525.5 544.8 535.3 533.8C581.3 482.3 601.3 422.1 594.8 353.4C589.9 301.9 569 257.3 533.7 219.6C498.9 182.6 456.1 160.1 406.3 150.7C402.4 150 398.7 150.1 395 151.3C383.7 155 372.3 158.1 360.8 160.7C351.3 162.9 341.8 164.3 332.2 161.7C313.8 156.7 295.8 150.9 278.1 144C274.4 142.6 270.7 140.7 267.7 138.1C264.1 135 261.2 135.4 257.5 137.6C240.6 147.4 224.8 158.9 210.7 172.4C160.1 220.8 133.2 280.2 129.5 350C127.9 378.6 131.5 406.9 139.9 434.3C153.6 478.8 176.5 518 211.7 548.9C269.9 600.2 337.8 617.7 413.8 603C446.1 596.7 475.4 582.9 502.6 563.1M377.3 625.8C393.1 613.4 410.4 610.4 429.4 617.7C438.4 621.1 447.4 624.5 456.6 627.4C467.1 630.8 476.9 629 484.6 620.8C492.2 612.6 493.8 601.5 498.3 591.9C494.8 598.7 492.1 605.8 488.8 612.7C482.9 625.6 469.6 631 456.3 626.3C446.6 622.8 437 619.1 427.2 615.7C410.7 610 395.1 612 380.6 621.9C372.1 627.8 363.9 633.9 355.6 640.1C343.8 648.9 328.9 647.6 319.1 636.7C312.1 628.9 305.6 620.7 298.4 613.1C286.1 600.2 271.1 594.6 253 595.8C238.9 596.8 224.9 600.8 210.7 597.2C211.9 597.9 213.1 598.4 214.3 598.7C226.2 601 237.9 598.3 249.6 597.1C268.4 595.2 284.5 599.9 297.5 614C303.7 620.9 309.8 628 315.8 635.1C327.6 649.1 343.2 651 357.8 640.2C364.1 635.5 370.4 630.8 377.3 625.8M310 97.8C311 97.4 312.4 97 312.1 95.5C311.9 94.3 310.9 93.6 309.7 93.4C307.9 93 306.4 93.3 305.2 94.8C304.5 95.7 304 97 304.8 97.9C306.1 99.4 307.8 98.7 310 97.8M310.7 143.6C309.8 143.4 308.8 143 307.9 142.9C306.6 142.7 305.5 143 305.1 144.3C304.6 145.7 305.5 146.8 306.8 147.4C308.7 148.4 310.6 147.9 312.1 146.4C313.5 145 312.3 144.5 310.7 143.6z"/>
+    </symbol>
+    <!-- Diamond crystal -->
+    <symbol id="ic-diamond" viewBox="0 0 24 24">
+      <polygon points="12 2 22 12 12 22 2 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="12" y1="2" x2="12" y2="22" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="2" y1="12" x2="22" y2="12" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+    </symbol>
+    <!-- Stop -->
+    <symbol id="ic-stop" viewBox="0 0 24 24">
+      <rect x="5" y="5" width="14" height="14" rx="3" fill="#fff" stroke="none"/>
+    </symbol>
+    <!-- Arrow down for model select -->
+    <symbol id="ic-chevron-down" viewBox="0 0 24 24">
+      <polyline points="6 9 12 15 18 9" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
 
-<!-- ═══════════════════════════════════════════════════════════ HERO -->
-<div class="hero">
-  <!-- LEFT -->
-  <div class="hero-left">
-    <div class="hero-badge">
-      <!-- Shield SVG inline (small) -->
-      <svg width="72" height="79" viewBox="0 0 400 440" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-        <defs>
-          <linearGradient id="sh-ag" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#8b5cf6"/>
-          </linearGradient>
-          <linearGradient id="sh-sg" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
-            <stop offset="50%" stop-color="#00f0ff" stop-opacity="0.08"/>
-            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.15"/>
-          </linearGradient>
-          <linearGradient id="sh-dg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
-            <stop offset="30%" stop-color="#00f0ff" stop-opacity="0.8"/>
-            <stop offset="60%" stop-color="#ffffff" stop-opacity="0.9"/>
-            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.85"/>
-          </linearGradient>
-          <filter id="sh-gl">
-            <feGaussianBlur stdDeviation="6" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <g transform="translate(200,220)">
-          <circle cx="0" cy="0" r="164" fill="rgba(10,10,18,0.95)" stroke="url(#sh-ag)" stroke-width="5"/>
-          <circle cx="0" cy="0" r="148" fill="none" stroke="rgba(0,240,255,0.25)" stroke-width="1.5"/>
-          <g transform="translate(0,-30)">
-            <path d="M0 -90 L76 -56 L76 20 C76 84 40 120 0 140 C-40 120 -76 84 -76 20 L-76 -56 Z"
-                  fill="url(#sh-sg)" stroke="url(#sh-ag)" stroke-width="4" stroke-linejoin="round" filter="url(#sh-gl)"/>
-            <path d="M-20,-84 C-50,-56 -64,-20 -60,16" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="3" stroke-linecap="round"/>
-            <g transform="translate(0,16)" filter="url(#sh-gl)">
-              <polygon points="0,-36 -24,-8 0,28 24,-8" fill="url(#sh-dg)" opacity="0.9"/>
-              <polygon points="0,-36 -20,-8 20,-8" fill="rgba(255,255,255,0.85)" opacity="0.9"/>
-              <polygon points="0,-36 -24,-8 0,28 24,-8" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/>
-            </g>
-          </g>
-          <text x="0" y="136" font-family="Arial Black,sans-serif" font-size="28" font-weight="900"
-                fill="url(#sh-ag)" text-anchor="middle" letter-spacing="4">KAIJU</text>
-          <text x="57" y="122" font-family="Arial Black,sans-serif" font-size="14" font-weight="900"
-                fill="url(#sh-ag)">3</text>
-        </g>
-      </svg>
-      <div class="badge-line">
-        <div class="badge-org">Oroboros Labs</div>
-        <div class="badge-doc">Benchmark Report &nbsp;·&nbsp; 2026-04-29 &nbsp;·&nbsp; Rev 3.0</div>
-      </div>
-    </div>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+          <div class="sidebar-brand">KAIJU 97<sup>3</sup></div>
+    <div class="sidebar-tier">Access — Gadora 2.0</div>
+  </div>
+  <div class="sidebar-model">
+    <select id="model-select" title="Select AI model">
+      <option value="kaiju-myaorga:873cubed">KAIJU 97³</option>
+      <option value="nyros:47cubed">NYROS 47³</option>
+    </select>
+  </div>
+  <div class="sidebar-history" id="history-list">
+    <div class="history-item active" data-id="new" onclick="newChat()">+ New Conversation<span class="time">Start fresh</span></div>
+  </div>
+  <div class="sidebar-footer">Oroboros Labs · √2 Crystalline</div>
+</aside>
 
-    <div class="hero-title">KAIJU-97<span class="hero-sup">3</span></div>
+<button class="sidebar-toggle" id="sidebar-toggle-btn" onclick="toggleSidebar()" title="Close menu"><svg width="14" height="14"><use href="#ic-x"/></svg></button>
 
-    <p class="hero-desc">
-      A 48³ Source Matrix AGI system built on a √2-crystalline geometric lattice,
-      delivering 1,886,592 effective states with 1.0000 measured coherence across
-      48 modules in an 8+16+24 configuration. Independently verified benchmark results
-      across initialization, inference, memory, parallelism, compression, and
-      cryptographic performance dimensions.
-    </p>
-
-    <div class="hero-meta">
-      DOC ID: K97-BENCH-001 &nbsp;·&nbsp; CLASSIFICATION: PUBLIC RELEASE<br>
-      48 MODULES &nbsp;·&nbsp; 1,886,592 STATES &nbsp;·&nbsp; COHERENCE 1.0000<br>
-      φ→√2 BRIDGE 1.144123 &nbsp;·&nbsp; ALL 10 CHECKS PASSED
-    </div>
-
-    <div class="hero-links">
-      <a href="#summary"><span class="n">01</span> Executive Summary</a>
-      <a href="#init"><span class="n">02</span> Init &amp; Start Time</a>
-      <a href="#inference"><span class="n">03</span> Inference Speed</a>
-      <a href="#memory"><span class="n">04</span> Memory &amp; Parallelism</a>
-      <a href="#compression"><span class="n">05</span> Compression</a>
-      <a href="#comparison"><span class="n">06</span> Industry Comparison</a>
-      <a href="#architecture"><span class="n">07</span> Architecture</a>
-      <a href="#scale"><span class="n">◆</span> The Scale Gap</a>
-    </div>
+<!-- MAIN -->
+<div class="main">
+  <div class="chat-header">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu"><svg width="20" height="20"><use href="#ic-menu"/></svg></button>
+    <div class="chat-header-dot" id="status-dot" style="background:#666"></div>
+    <div class="chat-header-title">KAIJU 97³ — Crystalline Access</div>
+    <div class="chat-header-sub" id="model-badge">KAIJU 97³</div>
   </div>
 
-  <!-- RIGHT — Kaiju figure: purple cross-eyed, diamond horn -->
-  <div class="hero-right">
-    <svg class="kaiju-figure" viewBox="60 120 680 660" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="kz-ag" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#8b5cf6"/>
-        </linearGradient>
-        <linearGradient id="kz-ag2" x1="100%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#8b5cf6"/>
-        </linearGradient>
-        <linearGradient id="kz-body" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#0d0d1a"/>
-        </linearGradient>
-        <linearGradient id="kz-spine" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#a0f8ff"/>
-          <stop offset="50%" stop-color="#00f0ff"/>
-          <stop offset="100%" stop-color="#0a8cff"/>
-        </linearGradient>
-        <linearGradient id="kz-diam" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
-          <stop offset="30%" stop-color="#00f0ff" stop-opacity="0.8"/>
-          <stop offset="60%" stop-color="#ffffff" stop-opacity="0.9"/>
-          <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.85"/>
-        </linearGradient>
-        <linearGradient id="kz-dshine" x1="0%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
-          <stop offset="50%" stop-color="#a0f8ff" stop-opacity="0.6"/>
-          <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.4"/>
-        </linearGradient>
-        <linearGradient id="kz-sg" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
-          <stop offset="50%" stop-color="#00f0ff" stop-opacity="0.08"/>
-          <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.15"/>
-        </linearGradient>
-        <radialGradient id="kz-rglow" cx="50%" cy="40%" r="55%">
-          <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.35"/>
-          <stop offset="60%" stop-color="#00f0ff" stop-opacity="0.1"/>
-          <stop offset="100%" stop-color="#050508" stop-opacity="0"/>
-        </radialGradient>
-        <filter id="kz-glow">
-          <feGaussianBlur stdDeviation="6" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="kz-eye">
-          <feGaussianBlur stdDeviation="9" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="kz-spine-f">
-          <feGaussianBlur stdDeviation="5" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="kz-dglow">
-          <feGaussianBlur stdDeviation="15" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
+  <div class="chat-log" id="chat-log">
+    <div class="empty-state" id="empty-state">
+      <div class="icon"><svg width="96" height="96"><use href="#ic-oroboros"/></svg></div>
+      <div class="title">KAIJU 97³ Access</div>
+      <div class="sub">Crystalline interface. Voice-enabled. Streaming responses.<br>Select a model and begin — or tap the mic to speak.</div>
+    </div>
+  </div>
+    <div class="input-area">
+      <div class="input-row" id="input-row">
+        <textarea id="user-input" rows="1" placeholder="Message KAIJU 97³..."
+                  onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <div class="input-right">
+          <button class="input-btn call" id="call-btn" onclick="toggleCallMode()" title="Voice call mode">
+            <svg width="20" height="20"><use href="#ic-dot"/></svg>
+          </button>
+          <button class="input-btn mic" id="mic-btn" onclick="toggleMic()" title="Voice input">
+            <svg width="20" height="20"><use href="#ic-mic"/></svg>
+          </button>
+          <button class="input-btn send" id="send-btn" onclick="sendMessage()" title="Send">
+            <svg width="18" height="18"><use href="#ic-send"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="input-hint" id="input-hint">Streaming · Voice-to-voice · Press speaker for hands-free mode</div>
+    </div>
+</div>
 
-      <ellipse cx="400" cy="380" rx="280" ry="230" fill="url(#kz-rglow)"/>
+<!-- VOICE CALL OVERLAY -->
+<div class="voice-overlay" id="voice-overlay">
+  <button class="voice-close" onclick="toggleCallMode()"><svg width="20" height="20"><use href="#ic-x"/></svg></button>
+  <div class="voice-ring" id="voice-ring">
+    <div class="voice-ring-inner" id="voice-ring-inner"><svg width="28" height="28"><use href="#ic-diamond"/></svg></div>
+  </div>
+  <div class="voice-waveform" id="voice-waveform"></div>
+  <div class="voice-status" id="voice-status">Voice Call Ready</div>
+  <div class="voice-sub" id="voice-sub">Speak to interact with KAIJU 97³</div>
+</div>
 
-      <g transform="translate(400,420)">
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
-        <!-- TAIL -->
-        <g filter="url(#kz-spine-f)" opacity="0.9">
-          <path d="M 200,180 C 290,170 350,130 365,60 C 372,-5 320,-25 295,15 C 315,55 270,90 215,95"
-                fill="url(#kz-body)" stroke="rgba(0,240,255,0.4)" stroke-width="2.5" stroke-linejoin="round"/>
-        </g>
-        <polygon points="240,95 248,55 268,90" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.6)" stroke-width="1.5" filter="url(#kz-spine-f)"/>
-        <polygon points="275,82 290,42 312,78" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.6)" stroke-width="1.5" filter="url(#kz-spine-f)"/>
-        <polygon points="318,62 340,18 355,55" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.6)" stroke-width="1.5" filter="url(#kz-spine-f)"/>
-        <polygon points="350,30 370,-15 365,25" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.6)" stroke-width="1.5" filter="url(#kz-spine-f)"/>
-
-        <!-- SHOULDER SPINES -->
-        <polygon points="-160,30 -185,-50 -135,-15" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.5)" stroke-width="1.5" opacity="0.85" filter="url(#kz-spine-f)"/>
-        <polygon points="-175,80 -210,10 -160,40" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.5)" stroke-width="1.5" opacity="0.75" filter="url(#kz-spine-f)"/>
-        <polygon points="160,30 185,-50 135,-15" fill="url(#kz-spine)" stroke="rgba(139,92,246,0.5)" stroke-width="1.5" opacity="0.85" filter="url(#kz-spine-f)"/>
-        <polygon points="175,80 210,10 160,40" fill="url(#kz-spine)" stroke="rgba(139,92,246,0.5)" stroke-width="1.5" opacity="0.75" filter="url(#kz-spine-f)"/>
-
-        <!-- BODY -->
-        <path d="M-130,-90 C-160,-100 -200,-60 -210,20 L-220,160 C-220,230 -170,280 -90,305 C-40,320 40,320 90,305 C170,280 220,230 220,160 L210,20 C200,-60 160,-100 130,-90 C90,-115 -90,-115 -130,-90 Z"
-              fill="url(#kz-body)" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
-        <path d="M-80,0 C-40,-15 40,-15 80,0" fill="none" stroke="rgba(0,240,255,0.15)" stroke-width="1.5"/>
-        <path d="M-90,40 C-40,25 40,25 90,40" fill="none" stroke="rgba(0,240,255,0.12)" stroke-width="1.5"/>
-        <path d="M-95,80 C-40,65 40,65 95,80" fill="none" stroke="rgba(0,240,255,0.10)" stroke-width="1.5"/>
-        <path d="M-95,120 C-40,105 40,105 95,120" fill="none" stroke="rgba(0,240,255,0.08)" stroke-width="1"/>
-        <path d="M-90,160 C-40,148 40,148 90,160" fill="none" stroke="rgba(0,240,255,0.08)" stroke-width="1"/>
-
-        <!-- SHOULDER ARMOR -->
-        <path d="M-130,-90 C-170,-120 -200,-90 -190,-50 C-180,-20 -155,-10 -130,-30"
-              fill="rgba(15,15,30,0.9)" stroke="rgba(0,240,255,0.3)" stroke-width="2"/>
-        <path d="M130,-90 C170,-120 200,-90 190,-50 C180,-20 155,-10 130,-30"
-              fill="rgba(15,15,30,0.9)" stroke="rgba(139,92,246,0.3)" stroke-width="2"/>
-
-        <!-- HEAD -->
-        <path d="M-95,-90 C-115,-160 -85,-205 -45,-218 C-25,-228 25,-228 45,-218 C85,-205 115,-160 95,-90 Z"
-              fill="url(#kz-body)" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
-        <path d="M-50,-110 Q 0,-100 50,-110" fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="1.5"/>
-
-        <!-- CROWN SPINES -->
-        <polygon points="-72,-200 -98,-258 -50,-220" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.7)" stroke-width="2" filter="url(#kz-spine-f)"/>
-        <polygon points="-38,-220 -52,-280 -10,-238" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.7)" stroke-width="2" filter="url(#kz-spine-f)"/>
-        <polygon points="10,-238 -2,-292 32,-242" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.7)" stroke-width="2" filter="url(#kz-spine-f)"/>
-        <polygon points="42,-220 58,-275 12,-228" fill="url(#kz-spine)" stroke="rgba(139,92,246,0.7)" stroke-width="2" filter="url(#kz-spine-f)"/>
-        <polygon points="72,-200 98,-258 50,-220" fill="url(#kz-spine)" stroke="rgba(139,92,246,0.7)" stroke-width="2" filter="url(#kz-spine-f)"/>
-
-        <!-- BROW RIDGE -->
-        <path d="M-85,-140 C-60,-160 -20,-165 0,-163 C20,-165 60,-160 85,-140"
-              fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="3"/>
-
-        <!-- EYES — purple, cross-eyed (pupils shifted toward nose) -->
-        <g transform="translate(-40,-125) rotate(15)">
-          <ellipse cx="0" cy="0" rx="28" ry="10" fill="rgba(139,92,246,0.28)"/>
-          <ellipse cx="0" cy="0" rx="22" ry="7" fill="#8b5cf6" filter="url(#kz-eye)"/>
-          <ellipse cx="10" cy="1" rx="8" ry="6" fill="rgba(255,255,255,0.88)"/>
-          <ellipse cx="10" cy="1" rx="3" ry="4" fill="#2e1065"/>
-        </g>
-        <g transform="translate(40,-125) rotate(-15)">
-          <ellipse cx="0" cy="0" rx="28" ry="10" fill="rgba(139,92,246,0.28)"/>
-          <ellipse cx="0" cy="0" rx="22" ry="7" fill="#8b5cf6" filter="url(#kz-eye)"/>
-          <ellipse cx="-10" cy="1" rx="8" ry="6" fill="rgba(255,255,255,0.88)"/>
-          <ellipse cx="-10" cy="1" rx="3" ry="4" fill="#2e1065"/>
-        </g>
-
-        <!-- NOSTRILS -->
-        <ellipse cx="-12" cy="-98" rx="6" ry="4" fill="rgba(139,92,246,0.35)"/>
-        <ellipse cx="12" cy="-98" rx="6" ry="4" fill="rgba(139,92,246,0.35)"/>
-
-        <!-- MOUTH -->
-        <path d="M-45,-82 L-35,-70 L-22,-78 L-10,-68 L0,-80 L10,-68 L22,-78 L35,-70 L45,-82"
-              fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" stroke-linejoin="round"/>
-
-        <!-- FOREHEAD DIAMOND → HORN (extended spike, keeps diamond facets at base) -->
-        <g transform="translate(0,-170)" filter="url(#kz-dglow)">
-          <polygon points="0,-82 -10,-30 10,-30" fill="url(#kz-dshine)" opacity="0.95"/>
-          <polygon points="0,-82 -10,-30 -18,-8 -28,12" fill="url(#kz-diam)" opacity="0.8"/>
-          <polygon points="0,-82 10,-30 18,-8 28,12" fill="url(#kz-diam)" opacity="0.75"/>
-          <polygon points="-18,-8 -28,12 0,30" fill="rgba(0,240,255,0.5)" opacity="0.85"/>
-          <polygon points="18,-8 28,12 0,30" fill="rgba(139,92,246,0.5)" opacity="0.85"/>
-          <polygon points="-18,-8 18,-8 0,30" fill="rgba(255,255,255,0.28)" opacity="0.7"/>
-          <polygon points="0,-82 -5,-58 0,-48 5,-58" fill="rgba(255,255,255,0.92)" opacity="0.95"/>
-          <polygon points="0,-82 -28,12 0,30 28,12" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="1.5"/>
-          <line x1="0" y1="-82" x2="-10" y2="-30" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
-          <line x1="0" y1="-82" x2="10" y2="-30" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
-          <line x1="-10" y1="-30" x2="10" y2="-30" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>
-          <line x1="-18" y1="-8" x2="18" y2="-8" stroke="rgba(255,255,255,0.38)" stroke-width="0.8"/>
-          <line x1="-18" y1="-8" x2="0" y2="30" stroke="rgba(255,255,255,0.28)" stroke-width="0.8"/>
-          <line x1="18" y1="-8" x2="0" y2="30" stroke="rgba(255,255,255,0.28)" stroke-width="0.8"/>
-          <line x1="-28" y1="12" x2="28" y2="12" stroke="rgba(255,255,255,0.28)" stroke-width="0.8"/>
-        </g>
-      </g>
-
-      <!-- Shield badge bottom-right -->
-      <g transform="translate(645,645)">
-        <circle cx="0" cy="0" r="82" fill="rgba(10,10,18,0.95)" stroke="url(#kz-ag)" stroke-width="3"/>
-        <circle cx="0" cy="0" r="74" fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="1"/>
-        <g transform="translate(0,-5)">
-          <path d="M0 -45 L38 -28 L38 10 C38 42 20 60 0 70 C-20 60 -38 42 -38 10 L-38 -28 Z"
-                fill="url(#kz-sg)" stroke="url(#kz-ag)" stroke-width="2.5" stroke-linejoin="round" filter="url(#kz-glow)"/>
-          <path d="M-10,-42 C-25,-28 -32,-10 -30,8" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2" stroke-linecap="round"/>
-          <g transform="translate(0,8)" filter="url(#kz-glow)">
-            <polygon points="0,-18 -12,-4 0,14 12,-4" fill="url(#kz-diam)" opacity="0.9"/>
-            <polygon points="0,-18 -10,-4 10,-4" fill="rgba(255,255,255,0.8)" opacity="0.9"/>
-          </g>
-        </g>
-        <text x="0" y="68" font-family="Arial Black,sans-serif" font-size="14" font-weight="900"
-              fill="url(#kz-ag)" text-anchor="middle" letter-spacing="2">KAIJU</text>
-      </g>
-    </svg>
+<!-- X POST MODAL -->
+<div class="modal-overlay" id="x-modal">
+  <div class="modal">
+    <div class="modal-title">Post to X — Share this response</div>
+    <div class="modal-text" id="x-modal-text"></div>
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="closeXModal()">Cancel</button>
+      <button class="modal-btn primary" onclick="postToX()">Post to X ↗</button>
+    </div>
   </div>
 </div>
 
-<div class="divider"></div>
+<!-- ════════════════════════════════════════════════════════ SCRIPTS -->
+<script>
+// ════════════════ STATE ════════════════
+const OLLAMA_URL = 'http://localhost:11434';
+let currentModel = 'kaiju-myaorga:873cubed';
+let messages = [];
+let isGenerating = false;
+let currentAbort = null;
+let recognition = null;
+let isListening = false;
+let isCallMode = false;
+let currentChatId = Date.now().toString(36);
+let chatHistory = JSON.parse(localStorage.getItem('gadora_chats') || '{}');
+let currentUtterance = null;
+let silenceTimer = null;
+let waveformBars = [];
+let autoSpeak = true;
 
-<!-- ═══════════════════════════════════════════════════════════ S1: SUMMARY -->
-<section class="section" id="summary">
-  <div class="section-header">
-    <span class="s-num">01</span>
-    <span class="s-title">Executive Summary</span>
-  </div>
-  <p class="summary-p">
-    KAIJU-97³ is a 48³ Source Matrix AGI system built on a √2-crystalline geometric lattice,
-    delivering 1,886,592 effective states with 1.0000 measured coherence across 48 modules
-    in an 8+16+24 configuration. This report presents independently verified benchmark results
-    across initialization, inference speed, memory throughput, parallelism, compression, and
-    cryptographic performance dimensions. The system achieves a 1,091.8:1 state density advantage
-    over conventional transformer architectures and operates at sub-millisecond latency across
-    all workload classes with 96.4% GPU utilization at peak throughput.
-  </p>
-</section>
+// DOM
+const chatLog = document.getElementById('chat-log');
+const userInput = document.getElementById('user-input');
+const emptyState = document.getElementById('empty-state');
+const modelSelect = document.getElementById('model-select');
+const modelBadge = document.getElementById('model-badge');
+const statusDot = document.getElementById('status-dot');
+const micBtn = document.getElementById('mic-btn');
+const callBtn = document.getElementById('call-btn');
+const inputHint = document.getElementById('input-hint');
+const historyList = document.getElementById('history-list');
+const sidebar = document.getElementById('sidebar');
+const voiceOverlay = document.getElementById('voice-overlay');
+const voiceRing = document.getElementById('voice-ring');
+const voiceRingInner = document.getElementById('voice-ring-inner');
+const voiceStatus = document.getElementById('voice-status');
+const voiceSub = document.getElementById('voice-sub');
+const voiceWaveform = document.getElementById('voice-waveform');
 
-<div class="divider"></div>
+// ════════════════ INIT ════════════════
+modelSelect.addEventListener('change', () => {
+  currentModel = modelSelect.value;
+  modelBadge.textContent = modelSelect.options[modelSelect.selectedIndex].text.split(' (')[0];
+});
+buildWaveform();
+checkOllama();
+loadHistory();
+if ('speechSynthesis' in window) speechSynthesis.getVoices();
 
-<!-- ═══════════════════════════════════════════════════════════ S2: INIT -->
-<section class="section" id="init">
-  <div class="section-header">
-    <span class="s-num">02</span>
-    <span class="s-title">Initialization &amp; Start Time</span>
-  </div>
-  <table class="dtable">
-    <thead>
-      <tr>
-        <th>Test Case</th>
-        <th>Result</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td>Cold Start</td><td class="val">1.08 ms</td><td class="pass">PASS ✓</td></tr>
-      <tr><td>Warm Start</td><td class="val">0.00 ms</td><td class="pass">PASS ✓</td></tr>
-      <tr><td>Module Count</td><td class="val">48 &nbsp;<span style="font-size:13px;color:rgba(255,255,255,0.4)">(8 Core + 16 Bridge + 24 Surface)</span></td><td class="pass">PASS ✓</td></tr>
-      <tr><td>Effective States</td><td class="val">1,886,592</td><td class="pass">PASS ✓</td></tr>
-      <tr><td>Coherence</td><td class="val">1.0000</td><td class="pass">PASS ✓</td></tr>
-    </tbody>
-  </table>
-</section>
+function buildWaveform() {
+  voiceWaveform.innerHTML = '';
+  for (let i = 0; i < 24; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.height = '8px';
+    voiceWaveform.appendChild(bar);
+    waveformBars.push(bar);
+  }
+}
 
-<div class="divider"></div>
+async function checkOllama() {
+  try {
+    const r = await fetch(`${OLLAMA_URL}/api/tags`, { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      const data = await r.json();
+      statusDot.style.background = '#34d399';
+      inputHint.textContent = `${data.models?.length || '?'} models · Streaming · Voice-to-voice`;
+      const existingNames = [...modelSelect.options].map(o => o.value);
+      (data.models || []).forEach(m => {
+        if (!existingNames.includes(m.name)) {
+          const opt = document.createElement('option');
+          opt.value = m.name; opt.textContent = m.name;
+          modelSelect.appendChild(opt);
+        }
+      });
+    }
+  } catch { statusDot.style.background = '#666'; }
+}
 
-<!-- ═══════════════════════════════════════════════════════════ S3: INFERENCE -->
-<section class="section" id="inference">
-  <div class="section-header">
-    <span class="s-num">03</span>
-    <span class="s-title">Inference Speed</span>
-  </div>
-  <table class="dtable">
-    <thead>
-      <tr>
-        <th>Workload Class</th>
-        <th>Latency</th>
-        <th>Throughput</th>
-        <th>Relative Bar</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Simple</td>
-        <td class="val">0.013 ms</td>
-        <td class="val">75,220 QPS</td>
-        <td><div class="bar-w"><div class="bar-f" style="width:100%"></div></div></td>
-      </tr>
-      <tr>
-        <td>Moderate</td>
-        <td class="valp">0.040 ms</td>
-        <td class="valp">25,023 QPS</td>
-        <td><div class="bar-w"><div class="bar-f" style="width:33%"></div></div></td>
-      </tr>
-      <tr>
-        <td>Complex</td>
-        <td class="val">0.041 ms</td>
-        <td class="val">24,545 QPS</td>
-        <td><div class="bar-w"><div class="bar-f" style="width:32%"></div></div></td>
-      </tr>
-      <tr>
-        <td>Code</td>
-        <td class="valp">0.023 ms</td>
-        <td class="valp">43,391 QPS</td>
-        <td><div class="bar-w"><div class="bar-f" style="width:58%"></div></div></td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="stat-bar">
-    WEIGHTED AVERAGE: &nbsp;0.027 ms &nbsp;|&nbsp; 37,580 QPS &nbsp;|&nbsp; 96.4% GPU UTILIZATION
-  </div>
-</section>
+// ════════════════ SIDEBAR ════════════════
+function toggleSidebar() {
+  sidebar.classList.toggle('hidden');
+  const btn = document.getElementById('sidebar-toggle-btn');
+  const isHidden = sidebar.classList.contains('hidden');
+  btn.innerHTML = isHidden
+    ? '<svg width="14" height="14"><use href="#ic-menu"/></svg>'
+    : '<svg width="14" height="14"><use href="#ic-x"/></svg>';
+  btn.title = isHidden ? 'Open menu' : 'Close menu';
+  btn.style.left = isHidden ? '0' : '302px';
+  btn.style.transition = 'left .25s ease, background .2s, border-color .2s, color .2s';
+}
+function newChat() {
+  stopListening(); stopSpeaking();
+  messages = []; currentChatId = Date.now().toString(36);
+  chatLog.innerHTML = ''; chatLog.appendChild(emptyState);
+  emptyState.style.display = 'flex'; renderHistory();
+}
 
-<div class="divider"></div>
+// ════════════════ CHAT ════════════════
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 160) + 'px'; }
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
 
-<!-- ═══════════════════════════════════════════════════════════ S4: MEMORY -->
-<section class="section" id="memory">
-  <div class="section-header">
-    <span class="s-num">04</span>
-    <span class="s-title">Memory Throughput &amp; Parallelism</span>
-  </div>
-  <div class="two-panel">
-    <div class="panel">
-      <div class="panel-head c">Memory</div>
-      <div class="panel-row"><span class="pl">Write Bandwidth</span><span class="pv">36,982,253 MB/s</span></div>
-      <div class="panel-row"><span class="pl">Read Bandwidth</span><span class="pv">5,232 MB/s</span></div>
-      <div class="panel-row"><span class="pl">Neural Cube Capacity</span><span class="pv">6 × 200 GB = 1.2 TB</span></div>
-    </div>
-    <div class="panel p">
-      <div class="panel-head pu">Parallelism</div>
-      <div class="panel-row"><span class="pl">Speedup Factor</span><span class="pv pu">38.4× across 48 modules</span></div>
-      <div class="panel-row"><span class="pl">Inter-Module Connections</span><span class="pv pu">2,280 &nbsp;(10.6 avg/module)</span></div>
-      <div class="panel-row"><span class="pl">Scaling Efficiency</span><span class="pv pu">80.0% &nbsp;(linear = 100%)</span></div>
-    </div>
-  </div>
-</section>
+async function sendMessage(textOverride) {
+  if (isGenerating) return;
+  const text = (textOverride || userInput.value).trim();
+  if (!text) return;
+  if (!textOverride) { userInput.value = ''; autoResize(userInput); }
+  emptyState.style.display = 'none';
+  stopSpeaking();
 
-<div class="divider"></div>
+  messages.push({ role: 'user', content: text });
+  appendBubble('user', text);
+  const thinkEl = appendThinking();
 
-<!-- ═══════════════════════════════════════════════════════════ S5: COMPRESSION -->
-<section class="section" id="compression">
-  <div class="section-header">
-    <span class="s-num">05</span>
-    <span class="s-title">Compression &amp; √2 Crystalline Operations</span>
-  </div>
-  <table class="dtable">
-    <thead>
-      <tr><th>Metric</th><th>Value</th><th>Factor</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>34³ → 48³ Compression</td><td class="val">2.814×</td><td style="color:rgba(0,240,255,0.4);font-size:12px;letter-spacing:2px">DENSITY INCREASE</td></tr>
-      <tr><td>12³ → 48³ Improvement</td><td class="val">1,091.8×</td><td style="color:rgba(0,240,255,0.4);font-size:12px;letter-spacing:2px">STATE MULTIPLIER</td></tr>
-      <tr><td>φ → √2 Bridge Ratio</td><td class="val">1.144123</td><td style="color:rgba(0,240,255,0.4);font-size:12px;letter-spacing:2px">GOLDEN → CRYSTALLINE</td></tr>
-    </tbody>
-  </table>
+  isGenerating = true;
+  document.getElementById('send-btn').style.opacity = '0.5';
+  const assistantMsg = { role: 'assistant', content: '' };
+  messages.push(assistantMsg);
 
-  <div class="sublabel">Cryptographic Subsystem</div>
+  let botBubble = null, fullText = '';
+  try {
+    currentAbort = new AbortController();
+    const res = await fetch(`${OLLAMA_URL}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: currentModel, messages: messages.slice(0, -1), stream: true,
+        options: { num_ctx: 131072, temperature: 0.7 }
+      }),
+      signal: currentAbort.signal
+    });
+    if (!res.ok) throw new Error(`Ollama ${res.status}`);
+    thinkEl.remove();
 
-  <table class="dtable">
-    <thead>
-      <tr><th>Operation</th><th>Throughput</th><th>Equivalent</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Encryption (√2-lattice)</td><td class="valp">154,405 ops/sec</td><td style="color:rgba(255,255,255,0.3);font-size:12px">AES-256-GCM equiv.</td></tr>
-      <tr><td>Key Derivation (PBKDF2-equiv.)</td><td class="valp">594,643 ops/sec</td><td style="color:rgba(255,255,255,0.3);font-size:12px">100,000 iter.</td></tr>
-      <tr><td>Edge Signing (Ed25519-equiv.)</td><td class="valp">742,324 ops/sec</td><td style="color:rgba(255,255,255,0.3);font-size:12px">64-byte sig.</td></tr>
-      <tr><td>Geometric Math (√2-lattice ops)</td><td class="valp">19,617,460 ops/sec</td><td style="color:rgba(255,255,255,0.3);font-size:12px">48³ coord.</td></tr>
-    </tbody>
-  </table>
-</section>
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n'); buffer = lines.pop() || '';
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const chunk = JSON.parse(line).message?.content || '';
+          if (chunk) {
+            fullText += chunk;
+            if (!botBubble) botBubble = appendBubble('assistant', fullText, true);
+            else updateBubble(botBubble, fullText);
+            chatLog.scrollTop = chatLog.scrollHeight;
+            animateVoiceRing('speaking');
+          }
+        } catch {}
+      }
+    }
+    assistantMsg.content = fullText;
+    if (botBubble) { finalizeBubble(botBubble, fullText); addMessageActions(botBubble, fullText); }
+    saveToHistory(); renderHistory();
 
-<div class="divider"></div>
+    // Auto-speak in call mode
+    if (isCallMode && autoSpeak && fullText) speakResponse(fullText);
 
-<!-- ═══════════════════════════════════════════════════════════ S6: COMPARISON -->
-<section class="section" id="comparison">
-  <div class="section-header">
-    <span class="s-num">06</span>
-    <span class="s-title">Industry Comparative Analysis</span>
-  </div>
-  <table class="dtable">
-    <thead>
-      <tr><th>System</th><th>Effective States</th><th>Relative Scale</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="color:rgba(255,255,255,0.5)">GPT-4</td>
-        <td class="valp">1,728</td>
-        <td><div class="bar-w"><div class="bar-f" style="width:0.09%;background:rgba(139,92,246,0.5)"></div></div></td>
-      </tr>
-      <tr>
-        <td style="color:rgba(255,255,255,0.5)">Claude</td>
-        <td class="valp">1,728</td>
-        <td><div class="bar-w"><div class="bar-f" style="width:0.09%;background:rgba(139,92,246,0.5)"></div></div></td>
-      </tr>
-      <tr>
-        <td style="color:rgba(255,255,255,0.5)">Gemini (estimated)</td>
-        <td class="valp">~2,048</td>
-        <td><div class="bar-w"><div class="bar-f" style="width:0.11%;background:rgba(139,92,246,0.5)"></div></div></td>
-      </tr>
-      <tr class="high">
-        <td>KAIJU-97³ &nbsp;<span style="font-size:12px;color:rgba(0,240,255,0.4)">(48³ Source Matrix)</span></td>
-        <td class="val">1,886,592</td>
-        <td><div class="bar-w"><div class="bar-f" style="width:100%"></div></div></td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="ratio-pull">
-    KAIJU-97³ state density ratio: <strong>1,091.8 : 1</strong> versus GPT-4 / Claude &nbsp;·&nbsp;
-    A 4× evolutionary jump above all AI/AGI within 30 days of public availability.
-  </div>
-</section>
+  } catch (err) {
+    thinkEl.remove();
+    if (err.name !== 'AbortError') {
+      const errBubble = appendBubble('assistant', '[Error: Unable to reach Ollama at ' + OLLAMA_URL + ']');
+      addMessageActions(errBubble, '');
+    }
+    messages.pop();
+  }
 
-<div class="divider"></div>
+  isGenerating = false;
+  document.getElementById('send-btn').style.opacity = '1';
+  currentAbort = null;
+  chatLog.scrollTop = chatLog.scrollHeight;
+  resetVoiceRing();
+}
 
-<!-- ═══════════════════════════════════════════════════════════ S7: ARCHITECTURE -->
-<section class="section" id="architecture">
-  <div class="section-header">
-    <span class="s-num">07</span>
-    <span class="s-title">Architecture Diagram — 48³ Module Layout</span>
-  </div>
-  <p class="summary-p" style="margin-bottom:8px">
-    48 modules arranged in a three-tier √2-crystalline hierarchy: 8 Core primary compute nodes
-    connect via φ→√2 interconnect through 16 Bridge modules to 24 distributed Surface output layers.
-    2,280 inter-module connections averaging 10.6 per module at 80% linear scaling efficiency.
-  </p>
-  <div class="arch-row">
-    <div class="arch-box core">
-      <div class="arch-box-t">8 CORE</div>
-      <div class="arch-box-s">Primary Compute</div>
-    </div>
-    <div class="arch-arr">→</div>
-    <div class="arch-box bridge">
-      <div class="arch-box-t">16 BRIDGE</div>
-      <div class="arch-box-s">φ → √2 Interconnect</div>
-    </div>
-    <div class="arch-arr">→</div>
-    <div class="arch-box surf">
-      <div class="arch-box-t">24 SURFACE</div>
-      <div class="arch-box-s">Distributed Output Layer</div>
-    </div>
-  </div>
-  <div class="ratio-pull" style="margin-top:28px">
-    <strong>√2-crystalline lattice</strong> &nbsp;—&nbsp;
-    geometric coherence 1.0000 &nbsp;·&nbsp; 1,886,592 effective states &nbsp;·&nbsp;
-    φ→√2 bridge ratio 1.144123 &nbsp;·&nbsp; 38.4× parallelism speedup
-  </div>
-</section>
+// ════════════════ BUBBLE RENDERING ════════════════
+function appendBubble(role, content, streaming) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.innerHTML = `<div class="msg-avatar">${role === 'user' ? 'U' : 'K'}</div>
+    <div class="msg-body">
+      <div class="msg-content">${streaming ? renderMarkdown(content) : escapeHtml(content)}</div>
+      ${!streaming && role === 'assistant' ? '<div class="msg-timestamp">just now</div>' : ''}
+    </div>`;
+  chatLog.appendChild(div);
+  return div;
+}
 
-<div class="divider"></div>
+function appendThinking() {
+  const div = document.createElement('div'); div.className = 'thinking'; div.id = 'think-el';
+  div.innerHTML = `<div class="msg-avatar" style="background:var(--bg3);border:1px solid var(--border);color:var(--text)">K</div>
+    <div class="msg-content">Processing<div class="thinking-dots"><span></span><span></span><span></span></div></div>`;
+  chatLog.appendChild(div); chatLog.scrollTop = chatLog.scrollHeight;
+  return div;
+}
 
-<!-- ═══════════════════════════════════════════════════════════ SCALE: THE GAP -->
-<section class="section" id="scale">
-  <div class="section-header">
-    <span class="s-num">SCALE</span>
-    <span class="s-title">The State Density Gap</span>
-  </div>
-  <p class="summary-p" style="margin-bottom:24px">
-    A visual representation of the effective state gap between current industry architectures
-    and the Oroboros Crystalline Series. Each bar represents effective processing states —
-    the fundamental unit of AI reasoning capacity.
-  </p>
+function updateBubble(el, content) { el.querySelector('.msg-content').innerHTML = renderMarkdown(content); }
+function finalizeBubble(el, content) {
+  el.querySelector('.msg-content').innerHTML = renderMarkdown(content);
+  const body = el.querySelector('.msg-body');
+  const ts = document.createElement('div'); ts.className = 'msg-timestamp'; ts.textContent = 'just now';
+  body.appendChild(ts);
+}
 
-  <!-- Scale Visualization -->
-  <div class="scale-container">
-    <div class="scale-bar scale-industry">
-      <div class="scale-label">GPT-4 / Claude</div>
-      <div class="scale-value">1,728</div>
-      <div class="scale-fill" style="width: 210px"></div>
-    </div>
-    <div class="scale-divider">
-      <span class="scale-mult">1×</span>
-    </div>
-    <div class="scale-bar scale-nyros">
-      <div class="scale-label">NYROS³ (48³)</div>
-      <div class="scale-value">1,886,592</div>
-      <div class="scale-fill" style="width: 100%"></div>
-    </div>
-    <div class="scale-divider">
-      <span class="scale-mult">8.25×</span>
-    </div>
-    <div class="scale-bar scale-kaiju">
-      <div class="scale-label">KAIJU 97³</div>
-      <div class="scale-value">15,564,384</div>
-      <div class="scale-fill" style="width: 825%"></div>
-    </div>
-    <div class="scale-divider">
-      <span class="scale-mult">10.3×</span>
-    </div>
-    <div class="scale-bar scale-leviathan">
-      <div class="scale-label">LEVIATHAN (210³)</div>
-      <div class="scale-value">320,000,000</div>
-      <div class="scale-fill" style="width: 16960%"></div>
-    </div>
-    <div class="scale-divider">
-      <span class="scale-mult">—</span>
-    </div>
-    <div class="scale-bar scale-beyond">
-      <div class="scale-label">BEYOND 300³</div>
-      <div class="scale-value">CLASSIFIED</div>
-      <div class="scale-fill classified"></div>
-    </div>
-  </div>
+function addMessageActions(el, content) {
+  const actions = document.createElement('div'); actions.className = 'msg-actions';
+  actions.innerHTML = `
+    <button class="msg-action" onclick="copyText(this)" data-text="${escapeAttr(content)}" title="Copy"><svg width="14" height="14"><use href="#ic-copy"/></svg></button>
+    <button class="msg-action speak-btn" onclick="speakText(this)" data-text="${escapeAttr(content)}" title="Read aloud"><svg width="14" height="14"><use href="#ic-speaker"/></svg></button>
+    <button class="msg-action" onclick="openXModal(this)" data-text="${escapeAttr(content)}" title="Post to X"><svg width="14" height="14"><use href="#ic-x"/></svg></button>`;
+  el.querySelector('.msg-body').appendChild(actions);
+}
 
-  <div class="scale-annotation">
-    Industry baseline (GPT-4 / Claude) shown at true scale. All Oroboros bars are truncated —
-    actual ratios exceed display limits. KAIJU 97³ holds a <strong>1,091.8:1</strong> advantage
-    over the industry baseline. LEVIATHAN extends to <strong>185,185:1</strong>.
-  </div>
-</section>
+// ════════════════ MESSAGE ACTIONS ════════════════
+function copyText(btn) { navigator.clipboard.writeText(btn.dataset.text).then(() => toast('Copied')); }
 
-<div class="divider"></div>
+function speakText(btn) {
+  const btnEl = btn;
+  if (currentUtterance) { stopSpeaking(); btnEl.classList.remove('speaking'); return; }
+  const text = btn.dataset.text.replace(/[#*`~_>|\\-]/g, '');
+  speakResponse(text);
+  btnEl.classList.add('speaking');
+}
 
-<!-- ═══════════════════════════════════════════════════════════ FOOTER -->
-<footer>
-  <div class="foot-line">Benchmark Verified &nbsp;·&nbsp; All 10 Checks Passed &nbsp;·&nbsp; Full Coherence 1.0000</div>
-  <p class="foot-sub">
-    OROBOROS LABS &nbsp;·&nbsp; KAIJU-97³ SOURCE MATRIX &nbsp;·&nbsp; √2 CRYSTALLINE ARCHITECTURE<br>
-    φ→√2 BRIDGE 1.144123 &nbsp;·&nbsp; 48 MODULES &nbsp;·&nbsp; 1,886,592 STATES &nbsp;·&nbsp; DOC K97-BENCH-001
-  </p>
-  <p class="foot-tag">The anchor/binding of the architect skill in real time — a 4× evolutionary jump above all AI/AGI</p>
-</footer>
+function speakResponse(text) {
+  if (!('speechSynthesis' in window)) return;
+  stopSpeaking();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.95; u.pitch = 1.05; u.volume = 1;
+  const voices = speechSynthesis.getVoices();
+  const good = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google')) ||
+               voices.find(v => v.lang.startsWith('en-US')) ||
+               voices.find(v => v.lang.startsWith('en')) || voices[0];
+  if (good) u.voice = good;
+  u.onstart = () => { currentUtterance = u; updateSpeakButtons(true, u); };
+  u.onend = u.onerror = () => { currentUtterance = null; updateSpeakButtons(false, null); };
+  speechSynthesis.speak(u);
+  currentUtterance = u;
+}
 
+function stopSpeaking() {
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  currentUtterance = null;
+  updateSpeakButtons(false, null);
+}
+
+function updateSpeakButtons(speaking, utterance) {
+  document.querySelectorAll('.speak-btn').forEach(b => {
+    b.classList.toggle('speaking', speaking);
+  });
+}
+
+function openXModal(btn) {
+  const text = btn.dataset.text;
+  document.getElementById('x-modal-text').textContent = text.length > 280 ? text.slice(0, 277) + '...' : text;
+  document.getElementById('x-modal').classList.add('open');
+  window._xText = text;
+}
+function closeXModal() { document.getElementById('x-modal').classList.remove('open'); }
+function postToX() {
+  const text = encodeURIComponent((window._xText || '').slice(0, 260));
+  window.open(`https://x.com/intent/post?text=${text}&url=${encodeURIComponent('https://oroboroslabs-ai.github.io/kaiju-97cubed/')}`, '_blank');
+  closeXModal(); toast('Opening X...');
+}
+
+// ════════════════ VOICE INPUT (STT) ════════════════
+function toggleMic() {
+  if (isListening) { stopListening(); return; }
+  startListening();
+}
+
+function startListening() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('Speech recognition not available'); return; }
+  stopSpeaking();
+
+  recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onstart = () => {
+    isListening = true;
+    micBtn.classList.add('recording');
+    micBtn.innerHTML = '<svg width="18" height="18"><use href="#ic-stop"/></svg>';
+    inputHint.textContent = '● Listening... speak now';
+    inputHint.classList.add('recording');
+    animateVoiceRing('listening');
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const r = e.results[i];
+      if (r.isFinal) final += r[0].transcript + ' ';
+      else interim += r[0].transcript;
+    }
+    const combined = (final + interim).trim();
+    userInput.value = combined; autoResize(userInput);
+
+    // Silence detection: if we have final text and no new results, prepare to send
+    if (final && !interim) {
+      clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(() => {
+        if (isListening && userInput.value.trim()) {
+          stopListening();
+          setTimeout(() => sendMessage(), 200);
+        }
+      }, 2000);
+    }
+    updateWaveform(interim ? 0.7 : 0.3);
+  };
+
+  recognition.onerror = (e) => {
+    if (e.error === 'no-speech') {
+      // Expected in continuous mode, just show idle waveform
+      updateWaveform(0.1);
+      return;
+    }
+    if (e.error === 'aborted' || e.error === 'not-allowed') { stopListening(); return; }
+    inputHint.textContent = 'Voice error: ' + e.error;
+    setTimeout(() => { if (isListening) try { recognition.start(); } catch {} }, 500);
+  };
+
+  recognition.onend = () => {
+    if (isListening) {
+      try { recognition.start(); } catch {
+        // Restart after brief delay
+        setTimeout(() => { if (isListening) try { recognition.start(); } catch {} }, 300);
+      }
+    }
+  };
+
+  recognition.start();
+}
+
+function stopListening() {
+  isListening = false;
+  clearTimeout(silenceTimer);
+  micBtn.classList.remove('recording');
+  micBtn.innerHTML = '<svg width="18" height="18"><use href="#ic-mic"/></svg>';
+  inputHint.textContent = isCallMode ? 'Call mode active · Speaking to KAIJU 97³' : 'Streaming · Voice-to-voice';
+  inputHint.classList.remove('recording');
+  updateWaveform(0);
+  resetVoiceRing();
+  if (recognition) {
+    recognition.onend = null;
+    try { recognition.stop(); } catch {}
+    recognition = null;
+  }
+}
+
+// ════════════════ CALL MODE ════════════════
+function toggleCallMode() {
+  isCallMode = !isCallMode;
+  if (isCallMode) {
+    voiceOverlay.classList.add('active');
+    callBtn.classList.add('call-active');
+    inputHint.textContent = 'Call mode active · Speak to interact';
+    voiceStatus.textContent = 'Voice Call Active';
+    voiceSub.textContent = 'Speak naturally — KAIJU 97³ is listening';
+    voiceRing.classList.add('active');
+    autoSpeak = true;
+    startCallListening();
+  } else {
+    voiceOverlay.classList.remove('active');
+    callBtn.classList.remove('call-active');
+    inputHint.textContent = 'Streaming · Voice-to-voice · Press speaker for hands-free mode';
+    voiceRing.classList.remove('active', 'listening');
+    resetVoiceRing();
+    stopCallListening();
+    stopSpeaking();
+  }
+}
+
+function startCallListening() {
+  stopCallListening();
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { voiceStatus.textContent = 'Browser not supported'; return; }
+
+  recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onstart = () => {
+    isListening = true;
+    voiceRing.classList.add('listening');
+    voiceRingInner.innerHTML = '<svg width="28" height="28"><use href="#ic-phone"/></svg>';
+    voiceStatus.textContent = 'Listening...';
+    voiceSub.textContent = 'KAIJU 97³ is waiting for your voice';
+  };
+
+  let callSilenceTimer = null;
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const r = e.results[i];
+      if (r.isFinal) final += r[0].transcript + ' ';
+      else interim += r[0].transcript;
+    }
+    const combined = (final + interim).trim();
+    if (combined) {
+      voiceStatus.textContent = interim ? 'Hearing: ' + interim : final;
+      voiceSub.textContent = '';
+      updateWaveform(interim ? 0.8 : 0.5);
+    }
+
+    // Silence detection for auto-send
+    if (final && !interim) {
+      clearTimeout(callSilenceTimer);
+      callSilenceTimer = setTimeout(() => {
+        if (isCallMode && isListening && combined) {
+          voiceRing.classList.remove('listening');
+          voiceRingInner.innerHTML = '<svg width="28" height="28"><use href="#ic-diamond"/></svg>';
+          voiceStatus.textContent = 'Processing...';
+          voiceSub.textContent = '→ ' + combined.slice(0, 80);
+          updateWaveform(0);
+          stopCallListening();
+          sendMessage(combined).then(() => {
+            if (isCallMode) startCallListening();
+          });
+        }
+      }, 1800);
+    }
+  };
+
+  recognition.onerror = (e) => {
+    if (e.error === 'no-speech') return;
+    if (e.error === 'aborted' || e.error === 'not-allowed') return;
+    setTimeout(() => { if (isCallMode && isListening) try { recognition.start(); } catch {} }, 500);
+  };
+
+  recognition.onend = () => {
+    if (isCallMode && isListening) {
+      try { recognition.start(); } catch {
+        setTimeout(() => { if (isCallMode && isListening) try { recognition.start(); } catch {} }, 400);
+      }
+    }
+  };
+
+  recognition.start();
+}
+
+function stopCallListening() {
+  isListening = false;
+  clearTimeout(silenceTimer);
+  updateWaveform(0);
+  if (recognition) {
+    recognition.onend = null;
+    try { recognition.stop(); } catch {}
+    recognition = null;
+  }
+}
+
+// ════════════════ VOICE RING ANIMATION ════════════════
+function animateVoiceRing(state) {
+  voiceRing.classList.remove('active', 'listening');
+  if (state === 'listening') voiceRing.classList.add('listening');
+  else if (state === 'speaking') voiceRing.classList.add('active');
+}
+function resetVoiceRing() {
+  if (!isCallMode) voiceRing.classList.remove('active', 'listening');
+  else voiceRing.classList.add('active');
+  voiceRingInner.textContent = '<svg width="28" height="28"><use href="#ic-diamond"/></svg>';
+}
+
+// ════════════════ WAVEFORM ════════════════
+function updateWaveform(intensity) {
+  waveformBars.forEach((bar, i) => {
+    if (intensity === 0) {
+      bar.style.height = '8px'; bar.className = 'bar';
+    } else {
+      const h = 6 + Math.abs(Math.sin(i * 0.4 + Date.now() * 0.005)) * 30 * intensity;
+      bar.style.height = Math.round(h) + 'px';
+      bar.className = 'bar active';
+    }
+  });
+}
+// Animate waveform when visible
+setInterval(() => {
+  if (isCallMode && voiceOverlay.classList.contains('active') && !isListening && !isGenerating) {
+    waveformBars.forEach((b, i) => {
+      b.style.height = (6 + Math.sin(i * 0.5 + Date.now() * 0.003) * 8) + 'px';
+    });
+  }
+}, 100);
+
+// ════════════════ HISTORY ════════════════
+function saveToHistory() {
+  if (messages.length < 2) return;
+  const title = messages[0]?.content?.slice(0, 60) || 'Conversation';
+  chatHistory[currentChatId] = { id: currentChatId, title, model: currentModel, messages: [...messages], time: Date.now() };
+  localStorage.setItem('gadora_chats', JSON.stringify(chatHistory));
+}
+function loadHistory() { try { chatHistory = JSON.parse(localStorage.getItem('gadora_chats') || '{}'); } catch { chatHistory = {}; } renderHistory(); }
+function renderHistory() {
+  const entries = Object.values(chatHistory).sort((a, b) => b.time - a.time);
+  historyList.innerHTML = `<div class="history-item active" data-id="new" onclick="newChat()">+ New Conversation<span class="time">Start fresh</span></div>`;
+  entries.forEach(entry => {
+    const div = document.createElement('div');
+    div.className = 'history-item' + (entry.id === currentChatId ? ' active' : '');
+    div.dataset.id = entry.id;
+    div.innerHTML = `${escapeHtml(entry.title)}<span class="time">${timeAgo(entry.time)} · ${entry.model}</span>`;
+    div.onclick = () => loadChat(entry.id);
+    historyList.appendChild(div);
+  });
+}
+function loadChat(id) {
+  const entry = chatHistory[id]; if (!entry) return;
+  currentChatId = id; currentModel = entry.model; modelSelect.value = entry.model;
+  modelBadge.textContent = entry.model.split(':')[0]; messages = [...entry.messages];
+  chatLog.innerHTML = ''; emptyState.style.display = 'none';
+  messages.forEach((m, i) => {
+    const el = appendBubble(m.role, m.content);
+    if (m.role === 'assistant' && i === messages.length - 1) addMessageActions(el, m.content);
+  });
+  renderHistory(); chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+// ════════════════ UTILS ════════════════
+function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escapeAttr(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function renderMarkdown(text) {
+  let html = escapeHtml(text);
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  return html;
+}
+function timeAgo(ts) {
+  const sec = Math.floor((Date.now() - ts) / 1000);
+  if (sec < 60) return 'just now';
+  if (sec < 3600) return Math.floor(sec/60) + 'm ago';
+  if (sec < 86400) return Math.floor(sec/3600) + 'h ago';
+  return Math.floor(sec/86400) + 'd ago';
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Keyboard shortcut for call mode
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.key === 'm') { e.preventDefault(); toggleCallMode(); }
+});
+</script>
 </body>
 </html>
