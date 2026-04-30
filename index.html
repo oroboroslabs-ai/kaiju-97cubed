@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KAIJU-97³ ARCHITECTURE — Oroboros Labs</title>
+<title>KAIJU-97³ — Oroboros Labs Benchmark Report</title>
 <style>
 :root {
   --cyan: #00f0ff;
@@ -62,11 +62,11 @@ nav a {
   display: block;
   padding: 0 16px; height: 54px; line-height: 54px;
   font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-  color: #00f0ff; text-decoration: none;
+  color: rgba(0,240,255,0.35); text-decoration: none;
   border-bottom: 2px solid transparent;
-  transition: opacity .2s, border-color .2s;
+  transition: color .2s, border-color .2s;
 }
-nav a:hover { opacity: 0.7; border-bottom-color: var(--cyan); }
+nav a:hover { color: var(--cyan); border-bottom-color: var(--cyan); }
 
 /* ── HERO ── */
 .hero {
@@ -86,12 +86,12 @@ nav a:hover { opacity: 0.7; border-bottom-color: var(--cyan); }
 }
 .badge-line { display: flex; flex-direction: column; gap: 5px; }
 .badge-org {
-  font-size: 16px; letter-spacing: 5px;
-  color: rgba(0,240,255,0.6); text-transform: uppercase;
+  font-size: 11px; letter-spacing: 4px;
+  color: rgba(0,240,255,0.5); text-transform: uppercase;
 }
 .badge-doc {
-  font-size: 14px; letter-spacing: 2px;
-  color: #8b5cf6;
+  font-size: 10px; letter-spacing: 2px;
+  color: rgba(139,92,246,0.4);
 }
 .hero-title {
   font-size: clamp(50px, 6.5vw, 84px);
@@ -311,6 +311,95 @@ nav a:hover { opacity: 0.7; border-bottom-color: var(--cyan); }
   background-clip: text; font-weight: 900;
 }
 
+/* ── SCALE VISUALIZATION ── */
+.scale-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 12px;
+}
+.scale-bar {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 20px;
+  position: relative;
+  background: rgba(0,0,0,0.3);
+  border-left: 3px solid transparent;
+  margin-bottom: 0;
+  overflow: visible;
+}
+.scale-fill {
+  position: absolute;
+  left: 0; top: 0; height: 100%;
+  border-radius: 0 4px 4px 0;
+  transition: width 0.8s ease;
+  min-width: 2px;
+}
+.scale-industry { border-left-color: rgba(255,60,60,0.5); }
+.scale-industry .scale-fill { background: rgba(255,40,40,0.18); }
+.scale-nyros { border-left-color: rgba(0,240,255,0.5); }
+.scale-nyros .scale-fill { background: rgba(0,240,255,0.18); }
+.scale-kaiju { border-left-color: rgba(139,92,246,0.6); }
+.scale-kaiju .scale-fill { background: linear-gradient(90deg, rgba(0,240,255,0.22), rgba(139,92,246,0.22)); }
+.scale-leviathan { border-left-color: rgba(0,240,255,0.35); }
+.scale-leviathan .scale-fill { background: rgba(0,240,255,0.08); }
+.scale-beyond { border-left-color: rgba(255,255,255,0.08); }
+.scale-beyond .scale-fill.classified {
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 8px, transparent 8px, transparent 16px);
+  width: 100% !important;
+}
+
+.scale-label {
+  flex: 0 0 180px;
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.5); font-weight: 700;
+  position: relative; z-index: 2;
+}
+.scale-value {
+  flex: 0 0 160px;
+  text-align: right;
+  font-size: 14px; font-weight: 900;
+  color: var(--cyan); letter-spacing: 1px;
+  position: relative; z-index: 2;
+  padding-right: 20px;
+}
+.scale-beyond .scale-value { color: rgba(255,255,255,0.3); letter-spacing: 3px; font-size: 11px; }
+
+.scale-divider {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  padding-left: 200px;
+  position: relative;
+}
+.scale-divider::before {
+  content: '';
+  position: absolute;
+  left: 200px;
+  right: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.05);
+}
+.scale-mult {
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(139,92,246,0.5); font-weight: 700;
+  background: var(--dark2);
+  padding: 2px 10px;
+  position: relative; z-index: 2;
+}
+
+.scale-annotation {
+  margin-top: 20px;
+  font-size: 11px; color: rgba(255,255,255,0.3);
+  letter-spacing: 1px; line-height: 1.8;
+  padding: 14px 20px;
+  border-left: 2px solid rgba(139,92,246,0.2);
+}
+.scale-annotation strong {
+  color: var(--cyan); font-weight: 700;
+}
+
 /* footer */
 footer {
   position: relative; z-index: 1;
@@ -333,13 +422,20 @@ footer {
   .section { padding: 48px 20px; }
   .hero { padding: 40px 20px 32px; }
 }
+
+@media (max-width: 768px) {
+  .scale-label { flex: 0 0 120px; font-size: 9px; }
+  .scale-value { flex: 0 0 100px; font-size: 11px; padding-right: 10px; }
+  .scale-divider { padding-left: 120px; }
+  .scale-divider::before { left: 120px; }
+}
 </style>
 </head>
 <body>
 
 <!-- ═══════════════════════════════════════════════════════════ NAV -->
 <nav>
-  <a href="#" class="nav-brand" style="text-decoration:none">KAIJU-97<sup>3</sup> &nbsp;ARCHITECTURE</a>
+  <div class="nav-brand">KAIJU-97<sup>3</sup></div>
   <ul>
     <li><a href="#summary">Summary</a></li>
     <li><a href="#init">Init</a></li>
@@ -348,6 +444,7 @@ footer {
     <li><a href="#compression">Compression</a></li>
     <li><a href="#comparison">Comparison</a></li>
     <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#scale">Scale</a></li>
   </ul>
 </nav>
 
@@ -391,6 +488,10 @@ footer {
               <polygon points="0,-36 -24,-8 0,28 24,-8" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/>
             </g>
           </g>
+          <text x="0" y="136" font-family="Arial Black,sans-serif" font-size="28" font-weight="900"
+                fill="url(#sh-ag)" text-anchor="middle" letter-spacing="4">KAIJU</text>
+          <text x="57" y="122" font-family="Arial Black,sans-serif" font-size="14" font-weight="900"
+                fill="url(#sh-ag)">3</text>
         </g>
       </svg>
       <div class="badge-line">
@@ -423,6 +524,7 @@ footer {
       <a href="#compression"><span class="n">05</span> Compression</a>
       <a href="#comparison"><span class="n">06</span> Industry Comparison</a>
       <a href="#architecture"><span class="n">07</span> Architecture</a>
+      <a href="#scale"><span class="n">◆</span> The Scale Gap</a>
     </div>
   </div>
 
@@ -558,23 +660,14 @@ footer {
 
         <!-- FOREHEAD DIAMOND → HORN (extended spike, keeps diamond facets at base) -->
         <g transform="translate(0,-170)" filter="url(#kz-dglow)">
-          <!-- Horn tip upper section (narrow, like crown spines) -->
           <polygon points="0,-82 -10,-30 10,-30" fill="url(#kz-dshine)" opacity="0.95"/>
-          <!-- Left upper face -->
           <polygon points="0,-82 -10,-30 -18,-8 -28,12" fill="url(#kz-diam)" opacity="0.8"/>
-          <!-- Right upper face -->
           <polygon points="0,-82 10,-30 18,-8 28,12" fill="url(#kz-diam)" opacity="0.75"/>
-          <!-- Left lower face -->
           <polygon points="-18,-8 -28,12 0,30" fill="rgba(0,240,255,0.5)" opacity="0.85"/>
-          <!-- Right lower face -->
           <polygon points="18,-8 28,12 0,30" fill="rgba(139,92,246,0.5)" opacity="0.85"/>
-          <!-- Bottom center face -->
           <polygon points="-18,-8 18,-8 0,30" fill="rgba(255,255,255,0.28)" opacity="0.7"/>
-          <!-- Sparkle near horn tip -->
           <polygon points="0,-82 -5,-58 0,-48 5,-58" fill="rgba(255,255,255,0.92)" opacity="0.95"/>
-          <!-- Full outline -->
           <polygon points="0,-82 -28,12 0,30 28,12" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="1.5"/>
-          <!-- Facet lines -->
           <line x1="0" y1="-82" x2="-10" y2="-30" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
           <line x1="0" y1="-82" x2="10" y2="-30" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
           <line x1="-10" y1="-30" x2="10" y2="-30" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>
@@ -831,6 +924,68 @@ footer {
     <strong>√2-crystalline lattice</strong> &nbsp;—&nbsp;
     geometric coherence 1.0000 &nbsp;·&nbsp; 1,886,592 effective states &nbsp;·&nbsp;
     φ→√2 bridge ratio 1.144123 &nbsp;·&nbsp; 38.4× parallelism speedup
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════ SCALE: THE GAP -->
+<section class="section" id="scale">
+  <div class="section-header">
+    <span class="s-num">SCALE</span>
+    <span class="s-title">The State Density Gap</span>
+  </div>
+  <p class="summary-p" style="margin-bottom:24px">
+    A visual representation of the effective state gap between current industry architectures
+    and the Oroboros Crystalline Series. Each bar represents effective processing states —
+    the fundamental unit of AI reasoning capacity.
+  </p>
+
+  <!-- Scale Visualization -->
+  <div class="scale-container">
+    <div class="scale-bar scale-industry">
+      <div class="scale-label">GPT-4 / Claude</div>
+      <div class="scale-value">1,728</div>
+      <div class="scale-fill" style="width: 210px"></div>
+    </div>
+    <div class="scale-divider">
+      <span class="scale-mult">1×</span>
+    </div>
+    <div class="scale-bar scale-nyros">
+      <div class="scale-label">NYROS³ (48³)</div>
+      <div class="scale-value">1,886,592</div>
+      <div class="scale-fill" style="width: 100%"></div>
+    </div>
+    <div class="scale-divider">
+      <span class="scale-mult">8.25×</span>
+    </div>
+    <div class="scale-bar scale-kaiju">
+      <div class="scale-label">KAIJU 97³</div>
+      <div class="scale-value">15,564,384</div>
+      <div class="scale-fill" style="width: 825%"></div>
+    </div>
+    <div class="scale-divider">
+      <span class="scale-mult">10.3×</span>
+    </div>
+    <div class="scale-bar scale-leviathan">
+      <div class="scale-label">LEVIATHAN (210³)</div>
+      <div class="scale-value">320,000,000</div>
+      <div class="scale-fill" style="width: 16960%"></div>
+    </div>
+    <div class="scale-divider">
+      <span class="scale-mult">—</span>
+    </div>
+    <div class="scale-bar scale-beyond">
+      <div class="scale-label">BEYOND 300³</div>
+      <div class="scale-value">CLASSIFIED</div>
+      <div class="scale-fill classified"></div>
+    </div>
+  </div>
+
+  <div class="scale-annotation">
+    Industry baseline (GPT-4 / Claude) shown at true scale. All Oroboros bars are truncated —
+    actual ratios exceed display limits. KAIJU 97³ holds a <strong>1,091.8:1</strong> advantage
+    over the industry baseline. LEVIATHAN extends to <strong>185,185:1</strong>.
   </div>
 </section>
 
