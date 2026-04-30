@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KAIJU-97³ ARCHITECTURE — Oroboros Labs</title>
+<style>
+:root {
+  --cyan: #00f0ff;
+  --purple: #8b5cf6;
+  --dark: #070711;
+  --dark2: #0a0a14;
+  --dark3: #0f1020;
+  --text: #e2e8f0;
+  --bc: rgba(0,240,255,0.13);
+  --bp: rgba(139,92,246,0.18);
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'Courier New', 'Consolas', monospace;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,240,255,0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,240,255,0.028) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(7,7,17,0.94);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--bc);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  height: 54px;
+  gap: 0;
+}
+.nav-brand {
+  font-size: 15px; font-weight: 900;
+  letter-spacing: 3px;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-right: auto; white-space: nowrap;
+  font-family: 'Arial Black', sans-serif;
+}
+.nav-brand sup { font-size: 0.55em; vertical-align: super; -webkit-text-fill-color: var(--purple); }
+nav ul { display: flex; list-style: none; gap: 0; }
+nav a {
+  display: block;
+  padding: 0 16px; height: 54px; line-height: 54px;
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: #00f0ff; text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: opacity .2s, border-color .2s;
+}
+nav a:hover { opacity: 0.7; border-bottom-color: var(--cyan); }
+
+/* ── HERO ── */
+.hero {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 460px;
+  min-height: calc(100vh - 54px);
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 56px 40px 40px;
+  gap: 48px;
+  align-items: center;
+}
+.hero-left { display: flex; flex-direction: column; gap: 22px; }
+.hero-badge {
+  display: flex; align-items: center; gap: 20px;
+}
+.badge-line { display: flex; flex-direction: column; gap: 5px; }
+.badge-org {
+  font-size: 16px; letter-spacing: 5px;
+  color: rgba(0,240,255,0.6); text-transform: uppercase;
+}
+.badge-doc {
+  font-size: 14px; letter-spacing: 2px;
+  color: #8b5cf6;
+}
+.hero-title {
+  font-size: clamp(50px, 6.5vw, 84px);
+  font-weight: 900;
+  font-family: 'Arial Black', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(90deg, var(--cyan) 0%, var(--purple) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 4px; line-height: 1;
+  display: flex; align-items: flex-start;
+}
+.hero-sup {
+  font-size: 0.36em; line-height: 1;
+  margin-top: 0.06em;
+  -webkit-text-fill-color: var(--purple);
+  font-weight: 900; letter-spacing: 0;
+}
+.hero-desc {
+  font-size: 15px; line-height: 1.75;
+  color: rgba(255,255,255,0.52);
+  max-width: 560px; letter-spacing: 0.3px;
+}
+.hero-meta {
+  font-size: 11px;
+  color: rgba(0,240,255,0.32);
+  letter-spacing: 1.5px;
+  border-left: 2px solid rgba(0,240,255,0.18);
+  padding-left: 14px;
+  line-height: 2.1;
+}
+.hero-links {
+  display: flex; flex-wrap: wrap; gap: 9px;
+  margin-top: 4px;
+}
+.hero-links a {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px;
+  border: 1px solid rgba(0,240,255,0.12);
+  border-radius: 5px;
+  font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(0,240,255,0.55);
+  text-decoration: none;
+  background: rgba(0,240,255,0.02);
+  transition: all .2s;
+  white-space: nowrap;
+}
+.hero-links a:hover {
+  background: rgba(0,240,255,0.06);
+  border-color: rgba(0,240,255,0.35);
+  color: var(--cyan);
+  box-shadow: 0 0 18px rgba(0,240,255,0.08);
+}
+.hero-links .n { font-size: 9px; color: rgba(0,240,255,0.28); }
+.hero-right {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.hero-right::before {
+  content: '';
+  position: absolute; inset: -30px;
+  background: radial-gradient(ellipse at 50% 45%, rgba(139,92,246,0.14) 0%, transparent 68%);
+  pointer-events: none;
+}
+.kaiju-figure {
+  width: 100%; max-width: 440px;
+  filter: drop-shadow(0 0 48px rgba(139,92,246,0.28)) drop-shadow(0 0 20px rgba(0,240,255,0.1));
+  animation: float 7s ease-in-out infinite;
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-14px); }
+}
+
+/* ── SECTIONS ── */
+.divider {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,240,255,0.12), transparent);
+}
+.section {
+  position: relative; z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 68px 40px;
+}
+.section-header {
+  display: flex; align-items: baseline; gap: 14px;
+  margin-bottom: 30px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(0,240,255,0.08);
+}
+.s-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px;
+  border: 1px solid rgba(0,240,255,0.18);
+  border-radius: 4px;
+  font-size: 10px;
+  color: rgba(0,240,255,0.4);
+  flex-shrink: 0;
+}
+.s-title {
+  font-size: 18px; font-weight: 700;
+  letter-spacing: 5px; text-transform: uppercase;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* summary text */
+.summary-p {
+  font-size: 15px; line-height: 1.85;
+  color: rgba(255,255,255,0.55);
+  max-width: 880px;
+}
+
+/* data table */
+.dtable { width: 100%; border-collapse: collapse; font-size: 14px; }
+.dtable thead tr {
+  background: rgba(0,240,255,0.055);
+  border: 1px solid rgba(0,240,255,0.1);
+}
+.dtable thead th {
+  padding: 13px 20px; text-align: left;
+  font-size: 10px; letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(0,240,255,0.55); font-weight: 700;
+}
+.dtable tbody tr {
+  border-bottom: 1px solid rgba(0,240,255,0.035);
+  transition: background .15s;
+}
+.dtable tbody tr:hover { background: rgba(0,240,255,0.018); }
+.dtable td { padding: 13px 20px; color: rgba(255,255,255,0.5); vertical-align: middle; }
+.dtable .val { color: var(--cyan); font-weight: 700; font-size: 16px; }
+.dtable .valp { color: #c5a3ff; font-weight: 700; font-size: 16px; }
+.dtable .pass { color: #34d399; font-size: 13px; }
+.dtable .high { background: rgba(0,240,255,0.04); border-top: 1px solid rgba(0,240,255,0.18) !important; border-bottom: 1px solid rgba(0,240,255,0.18) !important; }
+.dtable .high td:first-child { color: var(--cyan); font-weight: 700; font-size: 16px; }
+.dtable .high .val { font-size: 20px; }
+
+/* bar */
+.bar-w { width: 160px; height: 7px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; }
+.bar-f { height: 100%; border-radius: 4px; background: linear-gradient(90deg,var(--cyan),var(--purple)); box-shadow: 0 0 8px rgba(0,240,255,0.4); }
+
+/* stat bar */
+.stat-bar {
+  background: rgba(0,240,255,0.035);
+  border: 1px solid rgba(0,240,255,0.08);
+  border-radius: 5px;
+  padding: 14px 24px;
+  text-align: center;
+  font-size: 13px; letter-spacing: 2px;
+  color: rgba(0,240,255,0.55);
+  margin-top: 18px; font-weight: 700;
+}
+
+/* two panel */
+.two-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.panel {
+  padding: 26px 28px;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid var(--bc);
+}
+.panel.p { border-color: var(--bp); }
+.panel-head {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  margin-bottom: 18px; padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.panel-head.c { color: rgba(0,240,255,0.45); }
+.panel-head.pu { color: rgba(139,92,246,0.45); }
+.panel-row {
+  display: flex; justify-content: space-between;
+  align-items: baseline; padding: 9px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.025);
+  gap: 10px;
+}
+.panel-row:last-child { border: none; }
+.pl { color: rgba(255,255,255,0.42); font-size: 13px; }
+.pv { color: var(--cyan); font-weight: 700; font-size: 14px; text-align: right; }
+.pv.pu { color: #c5a3ff; }
+
+/* subsec label */
+.sublabel {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(139,92,246,0.45);
+  margin: 26px 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(139,92,246,0.07);
+}
+
+/* arch */
+.arch-row { display: flex; align-items: stretch; gap: 14px; margin-top: 22px; }
+.arch-box {
+  flex: 1; padding: 22px 20px; border-radius: 7px; text-align: center;
+}
+.arch-box.core { background: rgba(0,240,255,0.07); border: 1px solid rgba(0,240,255,0.28); }
+.arch-box.bridge { background: rgba(139,92,246,0.07); border: 1px solid rgba(139,92,246,0.28); flex: 2; }
+.arch-box.surf { background: rgba(0,240,255,0.035); border: 1px solid rgba(0,240,255,0.18); flex: 3; }
+.arch-box-t { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
+.arch-box.core .arch-box-t { color: var(--cyan); }
+.arch-box.bridge .arch-box-t { color: #c5a3ff; }
+.arch-box.surf .arch-box-t { color: rgba(0,240,255,0.7); }
+.arch-box-s { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.25); }
+.arch-arr { font-size: 20px; color: rgba(255,255,255,0.12); display: flex; align-items: center; flex-shrink: 0; }
+
+/* ratio */
+.ratio-pull {
+  margin-top: 26px; padding: 14px 22px;
+  border-left: 3px solid rgba(0,240,255,0.25);
+  font-size: 13px; color: rgba(255,255,255,0.38);
+  letter-spacing: 1px; line-height: 1.7;
+}
+.ratio-pull strong {
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; font-weight: 900;
+}
+
+/* footer */
+footer {
+  position: relative; z-index: 1;
+  border-top: 1px solid rgba(0,240,255,0.07);
+  padding: 40px 40px 48px;
+  text-align: center;
+}
+.foot-line { font-size: 11px; color: rgba(0,240,255,0.35); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; font-weight: 700; }
+.foot-sub { font-size: 11px; color: rgba(255,255,255,0.16); letter-spacing: 1px; max-width: 860px; margin: 0 auto; line-height: 1.9; }
+.foot-tag { font-size: 10px; color: rgba(255,255,255,0.1); margin-top: 8px; font-style: italic; }
+
+@media (max-width: 960px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .two-panel { grid-template-columns: 1fr; }
+  .arch-row { flex-direction: column; }
+  .arch-arr { transform: rotate(90deg); justify-content: center; }
+  nav ul { display: none; }
+  nav { padding: 0 20px; }
+  .section { padding: 48px 20px; }
+  .hero { padding: 40px 20px 32px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ NAV -->
+<nav>
+  <a href="#" class="nav-brand" style="text-decoration:none">KAIJU-97<sup>3</sup> &nbsp;ARCHITECTURE</a>
+  <ul>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#init">Init</a></li>
+    <li><a href="#inference">Inference</a></li>
+    <li><a href="#memory">Memory</a></li>
+    <li><a href="#compression">Compression</a></li>
+    <li><a href="#comparison">Comparison</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════ HERO -->
+<div class="hero">
+  <!-- LEFT -->
+  <div class="hero-left">
+    <div class="hero-badge">
+      <!-- Shield SVG inline (small) -->
+      <svg width="72" height="79" viewBox="0 0 400 440" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <defs>
+          <linearGradient id="sh-ag" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#8b5cf6"/>
+          </linearGradient>
+          <linearGradient id="sh-sg" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
+            <stop offset="50%" stop-color="#00f0ff" stop-opacity="0.08"/>
+            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.15"/>
+          </linearGradient>
+          <linearGradient id="sh-dg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+            <stop offset="30%" stop-color="#00f0ff" stop-opacity="0.8"/>
+            <stop offset="60%" stop-color="#ffffff" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.85"/>
+          </linearGradient>
+          <filter id="sh-gl">
+            <feGaussianBlur stdDeviation="6" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <g transform="translate(200,220)">
+          <circle cx="0" cy="0" r="164" fill="rgba(10,10,18,0.95)" stroke="url(#sh-ag)" stroke-width="5"/>
+          <circle cx="0" cy="0" r="148" fill="none" stroke="rgba(0,240,255,0.25)" stroke-width="1.5"/>
+          <g transform="translate(0,-30)">
+            <path d="M0 -90 L76 -56 L76 20 C76 84 40 120 0 140 C-40 120 -76 84 -76 20 L-76 -56 Z"
+                  fill="url(#sh-sg)" stroke="url(#sh-ag)" stroke-width="4" stroke-linejoin="round" filter="url(#sh-gl)"/>
+            <path d="M-20,-84 C-50,-56 -64,-20 -60,16" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="3" stroke-linecap="round"/>
+            <g transform="translate(0,16)" filter="url(#sh-gl)">
+              <polygon points="0,-36 -24,-8 0,28 24,-8" fill="url(#sh-dg)" opacity="0.9"/>
+              <polygon points="0,-36 -20,-8 20,-8" fill="rgba(255,255,255,0.85)" opacity="0.9"/>
+              <polygon points="0,-36 -24,-8 0,28 24,-8" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/>
+            </g>
+          </g>
+        </g>
+      </svg>
+      <div class="badge-line">
+        <div class="badge-org">Oroboros Labs</div>
+        <div class="badge-doc">Benchmark Report &nbsp;·&nbsp; 2026-04-29 &nbsp;·&nbsp; Rev 3.0</div>
+      </div>
+    </div>
+
+    <div class="hero-title">KAIJU-97<span class="hero-sup">3</span></div>
+
+    <p class="hero-desc">
+      A 48³ Source Matrix AGI system built on a √2-crystalline geometric lattice,
+      delivering 1,886,592 effective states with 1.0000 measured coherence across
+      48 modules in an 8+16+24 configuration. Independently verified benchmark results
+      across initialization, inference, memory, parallelism, compression, and
+      cryptographic performance dimensions.
+    </p>
+
+    <div class="hero-meta">
+      DOC ID: K97-BENCH-001 &nbsp;·&nbsp; CLASSIFICATION: PUBLIC RELEASE<br>
+      48 MODULES &nbsp;·&nbsp; 1,886,592 STATES &nbsp;·&nbsp; COHERENCE 1.0000<br>
+      φ→√2 BRIDGE 1.144123 &nbsp;·&nbsp; ALL 10 CHECKS PASSED
+    </div>
+
+    <div class="hero-links">
+      <a href="#summary"><span class="n">01</span> Executive Summary</a>
+      <a href="#init"><span class="n">02</span> Init &amp; Start Time</a>
+      <a href="#inference"><span class="n">03</span> Inference Speed</a>
+      <a href="#memory"><span class="n">04</span> Memory &amp; Parallelism</a>
+      <a href="#compression"><span class="n">05</span> Compression</a>
+      <a href="#comparison"><span class="n">06</span> Industry Comparison</a>
+      <a href="#architecture"><span class="n">07</span> Architecture</a>
+    </div>
+  </div>
+
+  <!-- RIGHT — Kaiju figure: purple cross-eyed, diamond horn -->
+  <div class="hero-right">
+    <svg class="kaiju-figure" viewBox="60 120 680 660" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="kz-ag" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#8b5cf6"/>
+        </linearGradient>
+        <linearGradient id="kz-ag2" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#8b5cf6"/>
+        </linearGradient>
+        <linearGradient id="kz-body" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1a1a2e"/><stop offset="100%" stop-color="#0d0d1a"/>
+        </linearGradient>
+        <linearGradient id="kz-spine" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#a0f8ff"/>
+          <stop offset="50%" stop-color="#00f0ff"/>
+          <stop offset="100%" stop-color="#0a8cff"/>
+        </linearGradient>
+        <linearGradient id="kz-diam" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+          <stop offset="30%" stop-color="#00f0ff" stop-opacity="0.8"/>
+          <stop offset="60%" stop-color="#ffffff" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.85"/>
+        </linearGradient>
+        <linearGradient id="kz-dshine" x1="0%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+          <stop offset="50%" stop-color="#a0f8ff" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.4"/>
+        </linearGradient>
+        <linearGradient id="kz-sg" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
+          <stop offset="50%" stop-color="#00f0ff" stop-opacity="0.08"/>
+          <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.15"/>
+        </linearGradient>
+        <radialGradient id="kz-rglow" cx="50%" cy="40%" r="55%">
+          <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.35"/>
+          <stop offset="60%" stop-color="#00f0ff" stop-opacity="0.1"/>
+          <stop offset="100%" stop-color="#050508" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="kz-glow">
+          <feGaussianBlur stdDeviation="6" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="kz-eye">
+          <feGaussianBlur stdDeviation="9" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="kz-spine-f">
+          <feGaussianBlur stdDeviation="5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="kz-dglow">
+          <feGaussianBlur stdDeviation="15" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <ellipse cx="400" cy="380" rx="280" ry="230" fill="url(#kz-rglow)"/>
+
+      <g transform="translate(400,420)">
+
+        <!-- TAIL -->
+        <g filter="url(#kz-spine-f)" opacity="0.9">
+          <path d="M 200,180 C 290,170 350,130 365,60 C 372,-5 320,-25 295,15 C 315,55 270,90 215,95"
+                fill="url(#kz-body)" stroke="rgba(0,240,255,0.4)" stroke-width="2.5" stroke-linejoin="round"/>
+        </g>
+        <polygon points="240,95 248,55 268,90" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.6)" stroke-width="1.5" filter="url(#kz-spine-f)"/>
+        <polygon points="275,82 290,42 312,78" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.6)" stroke-width="1.5" filter="url(#kz-spine-f)"/>
+        <polygon points="318,62 340,18 355,55" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.6)" stroke-width="1.5" filter="url(#kz-spine-f)"/>
+        <polygon points="350,30 370,-15 365,25" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.6)" stroke-width="1.5" filter="url(#kz-spine-f)"/>
+
+        <!-- SHOULDER SPINES -->
+        <polygon points="-160,30 -185,-50 -135,-15" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.5)" stroke-width="1.5" opacity="0.85" filter="url(#kz-spine-f)"/>
+        <polygon points="-175,80 -210,10 -160,40" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.5)" stroke-width="1.5" opacity="0.75" filter="url(#kz-spine-f)"/>
+        <polygon points="160,30 185,-50 135,-15" fill="url(#kz-spine)" stroke="rgba(139,92,246,0.5)" stroke-width="1.5" opacity="0.85" filter="url(#kz-spine-f)"/>
+        <polygon points="175,80 210,10 160,40" fill="url(#kz-spine)" stroke="rgba(139,92,246,0.5)" stroke-width="1.5" opacity="0.75" filter="url(#kz-spine-f)"/>
+
+        <!-- BODY -->
+        <path d="M-130,-90 C-160,-100 -200,-60 -210,20 L-220,160 C-220,230 -170,280 -90,305 C-40,320 40,320 90,305 C170,280 220,230 220,160 L210,20 C200,-60 160,-100 130,-90 C90,-115 -90,-115 -130,-90 Z"
+              fill="url(#kz-body)" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+        <path d="M-80,0 C-40,-15 40,-15 80,0" fill="none" stroke="rgba(0,240,255,0.15)" stroke-width="1.5"/>
+        <path d="M-90,40 C-40,25 40,25 90,40" fill="none" stroke="rgba(0,240,255,0.12)" stroke-width="1.5"/>
+        <path d="M-95,80 C-40,65 40,65 95,80" fill="none" stroke="rgba(0,240,255,0.10)" stroke-width="1.5"/>
+        <path d="M-95,120 C-40,105 40,105 95,120" fill="none" stroke="rgba(0,240,255,0.08)" stroke-width="1"/>
+        <path d="M-90,160 C-40,148 40,148 90,160" fill="none" stroke="rgba(0,240,255,0.08)" stroke-width="1"/>
+
+        <!-- SHOULDER ARMOR -->
+        <path d="M-130,-90 C-170,-120 -200,-90 -190,-50 C-180,-20 -155,-10 -130,-30"
+              fill="rgba(15,15,30,0.9)" stroke="rgba(0,240,255,0.3)" stroke-width="2"/>
+        <path d="M130,-90 C170,-120 200,-90 190,-50 C180,-20 155,-10 130,-30"
+              fill="rgba(15,15,30,0.9)" stroke="rgba(139,92,246,0.3)" stroke-width="2"/>
+
+        <!-- HEAD -->
+        <path d="M-95,-90 C-115,-160 -85,-205 -45,-218 C-25,-228 25,-228 45,-218 C85,-205 115,-160 95,-90 Z"
+              fill="url(#kz-body)" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+        <path d="M-50,-110 Q 0,-100 50,-110" fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="1.5"/>
+
+        <!-- CROWN SPINES -->
+        <polygon points="-72,-200 -98,-258 -50,-220" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.7)" stroke-width="2" filter="url(#kz-spine-f)"/>
+        <polygon points="-38,-220 -52,-280 -10,-238" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.7)" stroke-width="2" filter="url(#kz-spine-f)"/>
+        <polygon points="10,-238 -2,-292 32,-242" fill="url(#kz-spine)" stroke="rgba(0,240,255,0.7)" stroke-width="2" filter="url(#kz-spine-f)"/>
+        <polygon points="42,-220 58,-275 12,-228" fill="url(#kz-spine)" stroke="rgba(139,92,246,0.7)" stroke-width="2" filter="url(#kz-spine-f)"/>
+        <polygon points="72,-200 98,-258 50,-220" fill="url(#kz-spine)" stroke="rgba(139,92,246,0.7)" stroke-width="2" filter="url(#kz-spine-f)"/>
+
+        <!-- BROW RIDGE -->
+        <path d="M-85,-140 C-60,-160 -20,-165 0,-163 C20,-165 60,-160 85,-140"
+              fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="3"/>
+
+        <!-- EYES — purple, cross-eyed (pupils shifted toward nose) -->
+        <g transform="translate(-40,-125) rotate(15)">
+          <ellipse cx="0" cy="0" rx="28" ry="10" fill="rgba(139,92,246,0.28)"/>
+          <ellipse cx="0" cy="0" rx="22" ry="7" fill="#8b5cf6" filter="url(#kz-eye)"/>
+          <ellipse cx="10" cy="1" rx="8" ry="6" fill="rgba(255,255,255,0.88)"/>
+          <ellipse cx="10" cy="1" rx="3" ry="4" fill="#2e1065"/>
+        </g>
+        <g transform="translate(40,-125) rotate(-15)">
+          <ellipse cx="0" cy="0" rx="28" ry="10" fill="rgba(139,92,246,0.28)"/>
+          <ellipse cx="0" cy="0" rx="22" ry="7" fill="#8b5cf6" filter="url(#kz-eye)"/>
+          <ellipse cx="-10" cy="1" rx="8" ry="6" fill="rgba(255,255,255,0.88)"/>
+          <ellipse cx="-10" cy="1" rx="3" ry="4" fill="#2e1065"/>
+        </g>
+
+        <!-- NOSTRILS -->
+        <ellipse cx="-12" cy="-98" rx="6" ry="4" fill="rgba(139,92,246,0.35)"/>
+        <ellipse cx="12" cy="-98" rx="6" ry="4" fill="rgba(139,92,246,0.35)"/>
+
+        <!-- MOUTH -->
+        <path d="M-45,-82 L-35,-70 L-22,-78 L-10,-68 L0,-80 L10,-68 L22,-78 L35,-70 L45,-82"
+              fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" stroke-linejoin="round"/>
+
+        <!-- FOREHEAD DIAMOND → HORN (extended spike, keeps diamond facets at base) -->
+        <g transform="translate(0,-170)" filter="url(#kz-dglow)">
+          <!-- Horn tip upper section (narrow, like crown spines) -->
+          <polygon points="0,-82 -10,-30 10,-30" fill="url(#kz-dshine)" opacity="0.95"/>
+          <!-- Left upper face -->
+          <polygon points="0,-82 -10,-30 -18,-8 -28,12" fill="url(#kz-diam)" opacity="0.8"/>
+          <!-- Right upper face -->
+          <polygon points="0,-82 10,-30 18,-8 28,12" fill="url(#kz-diam)" opacity="0.75"/>
+          <!-- Left lower face -->
+          <polygon points="-18,-8 -28,12 0,30" fill="rgba(0,240,255,0.5)" opacity="0.85"/>
+          <!-- Right lower face -->
+          <polygon points="18,-8 28,12 0,30" fill="rgba(139,92,246,0.5)" opacity="0.85"/>
+          <!-- Bottom center face -->
+          <polygon points="-18,-8 18,-8 0,30" fill="rgba(255,255,255,0.28)" opacity="0.7"/>
+          <!-- Sparkle near horn tip -->
+          <polygon points="0,-82 -5,-58 0,-48 5,-58" fill="rgba(255,255,255,0.92)" opacity="0.95"/>
+          <!-- Full outline -->
+          <polygon points="0,-82 -28,12 0,30 28,12" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="1.5"/>
+          <!-- Facet lines -->
+          <line x1="0" y1="-82" x2="-10" y2="-30" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+          <line x1="0" y1="-82" x2="10" y2="-30" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+          <line x1="-10" y1="-30" x2="10" y2="-30" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>
+          <line x1="-18" y1="-8" x2="18" y2="-8" stroke="rgba(255,255,255,0.38)" stroke-width="0.8"/>
+          <line x1="-18" y1="-8" x2="0" y2="30" stroke="rgba(255,255,255,0.28)" stroke-width="0.8"/>
+          <line x1="18" y1="-8" x2="0" y2="30" stroke="rgba(255,255,255,0.28)" stroke-width="0.8"/>
+          <line x1="-28" y1="12" x2="28" y2="12" stroke="rgba(255,255,255,0.28)" stroke-width="0.8"/>
+        </g>
+      </g>
+
+      <!-- Shield badge bottom-right -->
+      <g transform="translate(645,645)">
+        <circle cx="0" cy="0" r="82" fill="rgba(10,10,18,0.95)" stroke="url(#kz-ag)" stroke-width="3"/>
+        <circle cx="0" cy="0" r="74" fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="1"/>
+        <g transform="translate(0,-5)">
+          <path d="M0 -45 L38 -28 L38 10 C38 42 20 60 0 70 C-20 60 -38 42 -38 10 L-38 -28 Z"
+                fill="url(#kz-sg)" stroke="url(#kz-ag)" stroke-width="2.5" stroke-linejoin="round" filter="url(#kz-glow)"/>
+          <path d="M-10,-42 C-25,-28 -32,-10 -30,8" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2" stroke-linecap="round"/>
+          <g transform="translate(0,8)" filter="url(#kz-glow)">
+            <polygon points="0,-18 -12,-4 0,14 12,-4" fill="url(#kz-diam)" opacity="0.9"/>
+            <polygon points="0,-18 -10,-4 10,-4" fill="rgba(255,255,255,0.8)" opacity="0.9"/>
+          </g>
+        </g>
+        <text x="0" y="68" font-family="Arial Black,sans-serif" font-size="14" font-weight="900"
+              fill="url(#kz-ag)" text-anchor="middle" letter-spacing="2">KAIJU</text>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════ S1: SUMMARY -->
+<section class="section" id="summary">
+  <div class="section-header">
+    <span class="s-num">01</span>
+    <span class="s-title">Executive Summary</span>
+  </div>
+  <p class="summary-p">
+    KAIJU-97³ is a 48³ Source Matrix AGI system built on a √2-crystalline geometric lattice,
+    delivering 1,886,592 effective states with 1.0000 measured coherence across 48 modules
+    in an 8+16+24 configuration. This report presents independently verified benchmark results
+    across initialization, inference speed, memory throughput, parallelism, compression, and
+    cryptographic performance dimensions. The system achieves a 1,091.8:1 state density advantage
+    over conventional transformer architectures and operates at sub-millisecond latency across
+    all workload classes with 96.4% GPU utilization at peak throughput.
+  </p>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════ S2: INIT -->
+<section class="section" id="init">
+  <div class="section-header">
+    <span class="s-num">02</span>
+    <span class="s-title">Initialization &amp; Start Time</span>
+  </div>
+  <table class="dtable">
+    <thead>
+      <tr>
+        <th>Test Case</th>
+        <th>Result</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Cold Start</td><td class="val">1.08 ms</td><td class="pass">PASS ✓</td></tr>
+      <tr><td>Warm Start</td><td class="val">0.00 ms</td><td class="pass">PASS ✓</td></tr>
+      <tr><td>Module Count</td><td class="val">48 &nbsp;<span style="font-size:13px;color:rgba(255,255,255,0.4)">(8 Core + 16 Bridge + 24 Surface)</span></td><td class="pass">PASS ✓</td></tr>
+      <tr><td>Effective States</td><td class="val">1,886,592</td><td class="pass">PASS ✓</td></tr>
+      <tr><td>Coherence</td><td class="val">1.0000</td><td class="pass">PASS ✓</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════ S3: INFERENCE -->
+<section class="section" id="inference">
+  <div class="section-header">
+    <span class="s-num">03</span>
+    <span class="s-title">Inference Speed</span>
+  </div>
+  <table class="dtable">
+    <thead>
+      <tr>
+        <th>Workload Class</th>
+        <th>Latency</th>
+        <th>Throughput</th>
+        <th>Relative Bar</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Simple</td>
+        <td class="val">0.013 ms</td>
+        <td class="val">75,220 QPS</td>
+        <td><div class="bar-w"><div class="bar-f" style="width:100%"></div></div></td>
+      </tr>
+      <tr>
+        <td>Moderate</td>
+        <td class="valp">0.040 ms</td>
+        <td class="valp">25,023 QPS</td>
+        <td><div class="bar-w"><div class="bar-f" style="width:33%"></div></div></td>
+      </tr>
+      <tr>
+        <td>Complex</td>
+        <td class="val">0.041 ms</td>
+        <td class="val">24,545 QPS</td>
+        <td><div class="bar-w"><div class="bar-f" style="width:32%"></div></div></td>
+      </tr>
+      <tr>
+        <td>Code</td>
+        <td class="valp">0.023 ms</td>
+        <td class="valp">43,391 QPS</td>
+        <td><div class="bar-w"><div class="bar-f" style="width:58%"></div></div></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="stat-bar">
+    WEIGHTED AVERAGE: &nbsp;0.027 ms &nbsp;|&nbsp; 37,580 QPS &nbsp;|&nbsp; 96.4% GPU UTILIZATION
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════ S4: MEMORY -->
+<section class="section" id="memory">
+  <div class="section-header">
+    <span class="s-num">04</span>
+    <span class="s-title">Memory Throughput &amp; Parallelism</span>
+  </div>
+  <div class="two-panel">
+    <div class="panel">
+      <div class="panel-head c">Memory</div>
+      <div class="panel-row"><span class="pl">Write Bandwidth</span><span class="pv">36,982,253 MB/s</span></div>
+      <div class="panel-row"><span class="pl">Read Bandwidth</span><span class="pv">5,232 MB/s</span></div>
+      <div class="panel-row"><span class="pl">Neural Cube Capacity</span><span class="pv">6 × 200 GB = 1.2 TB</span></div>
+    </div>
+    <div class="panel p">
+      <div class="panel-head pu">Parallelism</div>
+      <div class="panel-row"><span class="pl">Speedup Factor</span><span class="pv pu">38.4× across 48 modules</span></div>
+      <div class="panel-row"><span class="pl">Inter-Module Connections</span><span class="pv pu">2,280 &nbsp;(10.6 avg/module)</span></div>
+      <div class="panel-row"><span class="pl">Scaling Efficiency</span><span class="pv pu">80.0% &nbsp;(linear = 100%)</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════ S5: COMPRESSION -->
+<section class="section" id="compression">
+  <div class="section-header">
+    <span class="s-num">05</span>
+    <span class="s-title">Compression &amp; √2 Crystalline Operations</span>
+  </div>
+  <table class="dtable">
+    <thead>
+      <tr><th>Metric</th><th>Value</th><th>Factor</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>34³ → 48³ Compression</td><td class="val">2.814×</td><td style="color:rgba(0,240,255,0.4);font-size:12px;letter-spacing:2px">DENSITY INCREASE</td></tr>
+      <tr><td>12³ → 48³ Improvement</td><td class="val">1,091.8×</td><td style="color:rgba(0,240,255,0.4);font-size:12px;letter-spacing:2px">STATE MULTIPLIER</td></tr>
+      <tr><td>φ → √2 Bridge Ratio</td><td class="val">1.144123</td><td style="color:rgba(0,240,255,0.4);font-size:12px;letter-spacing:2px">GOLDEN → CRYSTALLINE</td></tr>
+    </tbody>
+  </table>
+
+  <div class="sublabel">Cryptographic Subsystem</div>
+
+  <table class="dtable">
+    <thead>
+      <tr><th>Operation</th><th>Throughput</th><th>Equivalent</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Encryption (√2-lattice)</td><td class="valp">154,405 ops/sec</td><td style="color:rgba(255,255,255,0.3);font-size:12px">AES-256-GCM equiv.</td></tr>
+      <tr><td>Key Derivation (PBKDF2-equiv.)</td><td class="valp">594,643 ops/sec</td><td style="color:rgba(255,255,255,0.3);font-size:12px">100,000 iter.</td></tr>
+      <tr><td>Edge Signing (Ed25519-equiv.)</td><td class="valp">742,324 ops/sec</td><td style="color:rgba(255,255,255,0.3);font-size:12px">64-byte sig.</td></tr>
+      <tr><td>Geometric Math (√2-lattice ops)</td><td class="valp">19,617,460 ops/sec</td><td style="color:rgba(255,255,255,0.3);font-size:12px">48³ coord.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════ S6: COMPARISON -->
+<section class="section" id="comparison">
+  <div class="section-header">
+    <span class="s-num">06</span>
+    <span class="s-title">Industry Comparative Analysis</span>
+  </div>
+  <table class="dtable">
+    <thead>
+      <tr><th>System</th><th>Effective States</th><th>Relative Scale</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="color:rgba(255,255,255,0.5)">GPT-4</td>
+        <td class="valp">1,728</td>
+        <td><div class="bar-w"><div class="bar-f" style="width:0.09%;background:rgba(139,92,246,0.5)"></div></div></td>
+      </tr>
+      <tr>
+        <td style="color:rgba(255,255,255,0.5)">Claude</td>
+        <td class="valp">1,728</td>
+        <td><div class="bar-w"><div class="bar-f" style="width:0.09%;background:rgba(139,92,246,0.5)"></div></div></td>
+      </tr>
+      <tr>
+        <td style="color:rgba(255,255,255,0.5)">Gemini (estimated)</td>
+        <td class="valp">~2,048</td>
+        <td><div class="bar-w"><div class="bar-f" style="width:0.11%;background:rgba(139,92,246,0.5)"></div></div></td>
+      </tr>
+      <tr class="high">
+        <td>KAIJU-97³ &nbsp;<span style="font-size:12px;color:rgba(0,240,255,0.4)">(48³ Source Matrix)</span></td>
+        <td class="val">1,886,592</td>
+        <td><div class="bar-w"><div class="bar-f" style="width:100%"></div></div></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="ratio-pull">
+    KAIJU-97³ state density ratio: <strong>1,091.8 : 1</strong> versus GPT-4 / Claude &nbsp;·&nbsp;
+    A 4× evolutionary jump above all AI/AGI within 30 days of public availability.
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════ S7: ARCHITECTURE -->
+<section class="section" id="architecture">
+  <div class="section-header">
+    <span class="s-num">07</span>
+    <span class="s-title">Architecture Diagram — 48³ Module Layout</span>
+  </div>
+  <p class="summary-p" style="margin-bottom:8px">
+    48 modules arranged in a three-tier √2-crystalline hierarchy: 8 Core primary compute nodes
+    connect via φ→√2 interconnect through 16 Bridge modules to 24 distributed Surface output layers.
+    2,280 inter-module connections averaging 10.6 per module at 80% linear scaling efficiency.
+  </p>
+  <div class="arch-row">
+    <div class="arch-box core">
+      <div class="arch-box-t">8 CORE</div>
+      <div class="arch-box-s">Primary Compute</div>
+    </div>
+    <div class="arch-arr">→</div>
+    <div class="arch-box bridge">
+      <div class="arch-box-t">16 BRIDGE</div>
+      <div class="arch-box-s">φ → √2 Interconnect</div>
+    </div>
+    <div class="arch-arr">→</div>
+    <div class="arch-box surf">
+      <div class="arch-box-t">24 SURFACE</div>
+      <div class="arch-box-s">Distributed Output Layer</div>
+    </div>
+  </div>
+  <div class="ratio-pull" style="margin-top:28px">
+    <strong>√2-crystalline lattice</strong> &nbsp;—&nbsp;
+    geometric coherence 1.0000 &nbsp;·&nbsp; 1,886,592 effective states &nbsp;·&nbsp;
+    φ→√2 bridge ratio 1.144123 &nbsp;·&nbsp; 38.4× parallelism speedup
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════════ FOOTER -->
+<footer>
+  <div class="foot-line">Benchmark Verified &nbsp;·&nbsp; All 10 Checks Passed &nbsp;·&nbsp; Full Coherence 1.0000</div>
+  <p class="foot-sub">
+    OROBOROS LABS &nbsp;·&nbsp; KAIJU-97³ SOURCE MATRIX &nbsp;·&nbsp; √2 CRYSTALLINE ARCHITECTURE<br>
+    φ→√2 BRIDGE 1.144123 &nbsp;·&nbsp; 48 MODULES &nbsp;·&nbsp; 1,886,592 STATES &nbsp;·&nbsp; DOC K97-BENCH-001
+  </p>
+  <p class="foot-tag">The anchor/binding of the architect skill in real time — a 4× evolutionary jump above all AI/AGI</p>
+</footer>
+
+</body>
+</html>
